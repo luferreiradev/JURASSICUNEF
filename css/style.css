@@ -46,6 +46,11 @@ html, body {
 
 /* ---- Palco e canvas ---------------------------------------------------- */
 
+/* touch-action nao e herdado: sem repetir aqui, o navegador do celular ainda
+   tenta interpretar o arrasto sobre o canvas como rolagem e cancela o toque
+   no meio do deslize. */
+#palco, #tela, .tela, #hud, #toast { touch-action: none; }
+
 #palco {
   position: relative;
   z-index: 0;

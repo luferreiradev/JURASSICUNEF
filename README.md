@@ -16,7 +16,7 @@ O QR Code pronto para o cartaz está em [`qrcode.png`](qrcode.png) (1024×1024).
 |---|---|---|
 | Pular | toque na parte de cima da tela | `Espaço`, `↑` ou `W` |
 | Pular mais alto | segure o toque | segure a tecla |
-| Deslizar (passar por baixo da saliência) | segure o terço de baixo da tela | `↓` ou `S` |
+| Deslizar (passar por baixo da saliência) | arraste o dedo para baixo | `↓` ou `S` |
 
 Pegue os **ovos** para somar pontos e desbloquear curiosidades. A velocidade
 aumenta com a distância e o cenário passa por um ciclo de dia e noite.

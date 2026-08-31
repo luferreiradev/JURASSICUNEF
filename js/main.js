@@ -169,18 +169,33 @@
     else if (e.code === 'ArrowDown' || e.code === 'KeyS') Jogo.deslizar(false);
   });
 
-  // Toque / mouse: o terco de baixo da JANELA desliza, o resto pula. Medir na
-  // janela e nao no canvas importa em retrato, onde o canvas e so uma faixa no
-  // meio e o polegar cai fora dele.
+  // Toque / mouse: tocar em QUALQUER lugar pula; arrastar o dedo para baixo
+  // desliza.
+  //
+  // Antes o terco de baixo da tela era zona de deslize. Em paisagem esse e
+  // exatamente o pedaco onde o polegar descansa para pular, entao metade das
+  // tentativas de pulo viravam deslize — parecia que o dino estava travando
+  // deitado. Arrastar nao tem esse conflito: ninguem arrasta sem querer.
+  const ARRASTE_MIN = 45;      // pixels de tela para valer como "para baixo"
+  let toque = null;
+
   document.body.addEventListener('pointerdown', (e) => {
     if (e.target.closest('button')) return;   // deixa os botoes funcionarem
     e.preventDefault();
-    const rel = e.clientY / window.innerHeight;
-    if (estado === 'jogo' && rel > 0.66) Jogo.deslizar(true);
-    else acaoPrincipal();
+    toque = { id: e.pointerId, y: e.clientY, deslizou: false };
+    acaoPrincipal();
+  });
+
+  document.body.addEventListener('pointermove', (e) => {
+    if (!toque || e.pointerId !== toque.id || toque.deslizou) return;
+    if (estado !== 'jogo') return;
+    if (e.clientY - toque.y < ARRASTE_MIN) return;
+    toque.deslizou = true;
+    Jogo.deslizar(true);                      // no ar isso vira mergulho
   });
 
   function soltarTudo() {
+    toque = null;
     Jogo.soltarPulo();
     Jogo.deslizar(false);
   }

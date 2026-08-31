@@ -7,7 +7,13 @@
    O que isso prova, e que olhar screenshot nao prova:
      - todo obstaculo continua passavel conforme a velocidade sobe ate o teto;
      - o espaco entre obstaculos nunca fica menor que um pulo completo;
-     - a saliencia sempre da tempo de agachar e voltar a correr.
+     - a saliencia da tempo de deslizar pelos DOIS caminhos de entrada:
+       a seta do teclado (deslize direto) e o toque do celular, onde o dedo
+       primeiro dispara um pulo e so depois o arrasto vira mergulho.
+
+   O segundo caso e o que mais importa: no celular nao da para deslizar sem
+   antes pular, entao o robo precisa passar pelo mesmo caminho torto que o
+   jogador passa.
 
    Rodar:  node ferramentas/teste-jogabilidade.js
    ========================================================================= */
@@ -41,10 +47,18 @@ const PASSO = 1 / 60;
 const JOGADOR_X = 150;
 const FRENTE = JOGADOR_X + 34;      // ponta da caixa de colisao do dino
 
-// Antecedencia do pulo, em segundos. O pulo dura ~0,68s e o apice fica na
-// metade; saltar ~0,26s antes poe o dino no alto bem na hora do obstaculo.
-const ANTECEDENCIA_PULO = 0.26;
-const ANTECEDENCIA_DESLIZE = 0.16;
+// O pulo dura ~0,76s e o apice fica na metade. Saltar ~0,30s antes poe o dino
+// no alto exatamente na hora de passar pelo obstaculo.
+const ANTECEDENCIA_PULO = 0.30;
+
+// Teclado: a seta desliza na hora.
+const ANTECEDENCIA_DESLIZE_TECLADO = 0.16;
+
+// Toque: o dedo encosta (pula), e so ~0,12s depois o arrasto e reconhecido e
+// vira mergulho. Somando a queda, sao ~0,19s ate o dino estar deitado no chao,
+// entao o gesto precisa comecar bem mais cedo.
+const ANTECEDENCIA_DESLIZE_TOQUE = 0.34;
+const ATRASO_DO_ARRASTE = 7;        // passos de 1/60s entre o toque e o arrasto
 
 function proximoObstaculo(d) {
   let melhor = null;
@@ -55,7 +69,7 @@ function proximoObstaculo(d) {
   return melhor;
 }
 
-function jogarPartida(segundos, semente) {
+function jogarPartida(segundos, semente, modo) {
   // Torna o teste reproduzivel: sem isso duas execucoes divergem e um erro
   // raro aparece hoje e some amanha.
   let s = semente;
@@ -64,27 +78,48 @@ function jogarPartida(segundos, semente) {
     return s / 0x7fffffff;
   };
 
+  const porToque = modo === 'toque';
+  const antecedenciaDeslize = porToque ? ANTECEDENCIA_DESLIZE_TOQUE : ANTECEDENCIA_DESLIZE_TECLADO;
+
   Jogo.novaPartida();
   let deslizando = false;
-  let passos = Math.round(segundos / PASSO);
+  let arrastePendente = 0;          // > 0 = dedo encostado, arrasto a caminho
   let pulos = 0;
   let deslizes = 0;
+
+  const passos = Math.round(segundos / PASSO);
 
   for (let i = 0; i < passos; i++) {
     const d = Jogo.depuracao;
     const o = proximoObstaculo(d);
+
+    // O arrasto chega alguns quadros depois do toque, como no celular.
+    if (arrastePendente > 0 && --arrastePendente === 0) {
+      Jogo.deslizar(true);
+      deslizando = true;
+      deslizes++;
+    }
 
     if (o) {
       const distancia = o.x - FRENTE;
       const tempo = distancia / d.velocidade;
 
       if (o.tipo.saliencia) {
-        if (!deslizando && tempo <= ANTECEDENCIA_DESLIZE && distancia > -40) {
-          Jogo.deslizar(true); deslizando = true; deslizes++;
+        if (!deslizando && !arrastePendente && tempo <= antecedenciaDeslize && distancia > -40) {
+          if (porToque) {
+            Jogo.pular();             // o dedo encostando ja dispara o pulo
+            pulos++;
+            arrastePendente = ATRASO_DO_ARRASTE;
+          } else {
+            Jogo.deslizar(true);
+            deslizando = true;
+            deslizes++;
+          }
         }
       } else if (d.noChao && tempo <= ANTECEDENCIA_PULO && tempo > 0) {
         if (deslizando) { Jogo.deslizar(false); deslizando = false; }
-        Jogo.pular(); pulos++;
+        Jogo.pular();
+        pulos++;
       }
 
       // Sai do deslize assim que a saliencia acabou de passar.
@@ -105,7 +140,6 @@ function jogarPartida(segundos, semente) {
         segundos: (i * PASSO).toFixed(1),
         pontos: Jogo.pontos,
         velocidade: Math.round(dd.velocidade),
-        distancia: Math.round(dd.distancia),
         obstaculo: culpado ? culpado.tipo.id : '?',
         pulos, deslizes,
       };
@@ -118,7 +152,6 @@ function jogarPartida(segundos, semente) {
     segundos: segundos.toFixed(1),
     pontos: Jogo.pontos,
     velocidade: Math.round(d.velocidade),
-    distancia: Math.round(d.distancia),
     pulos, deslizes,
   };
 }
@@ -126,35 +159,42 @@ function jogarPartida(segundos, semente) {
 /* ---- Execucao ------------------------------------------------------------ */
 
 const DURACAO = 180;          // 3 minutos de jogo por partida
-const PARTIDAS = 12;
+const PARTIDAS = 10;
+const MODOS = [
+  ['teclado', 'seta para baixo desliza na hora'],
+  ['toque', 'dedo encosta (pula) e so depois arrasta'],
+];
 
 console.log('JURASSIC UNEF — teste de jogabilidade');
-console.log(`${PARTIDAS} partidas de ${DURACAO}s, robo jogando com pulo e deslize\n`);
+console.log(`${PARTIDAS} partidas de ${DURACAO}s em cada modo de controle\n`);
 
 let falhas = 0;
 const originalRandom = Math.random;
 
-for (let p = 0; p < PARTIDAS; p++) {
-  const r = jogarPartida(DURACAO, 1000 + p * 7919);
-  Math.random = originalRandom;
-  const marca = r.ok ? 'ok  ' : 'FALHA';
-  console.log(
-    `  ${marca} partida ${String(p + 1).padStart(2)}  ` +
-    `${String(r.segundos).padStart(5)}s  ` +
-    `${String(r.pontos).padStart(5)} pts  ` +
-    `vel ${String(r.velocidade).padStart(3)}  ` +
-    `${String(r.pulos).padStart(3)} pulos  ${String(r.deslizes).padStart(2)} deslizes` +
-    (r.ok ? '' : `  <- morreu em "${r.obstaculo}"`)
-  );
-  if (!r.ok) falhas++;
+for (const [modo, descricao] of MODOS) {
+  console.log(`[${modo}] ${descricao}`);
+  for (let p = 0; p < PARTIDAS; p++) {
+    const r = jogarPartida(DURACAO, 1000 + p * 7919, modo);
+    Math.random = originalRandom;
+    console.log(
+      `  ${r.ok ? 'ok  ' : 'FALHA'} partida ${String(p + 1).padStart(2)}  ` +
+      `${String(r.segundos).padStart(5)}s  ` +
+      `${String(r.pontos).padStart(5)} pts  ` +
+      `vel ${String(r.velocidade).padStart(3)}  ` +
+      `${String(r.pulos).padStart(3)} pulos  ${String(r.deslizes).padStart(2)} deslizes` +
+      (r.ok ? '' : `  <- morreu em "${r.obstaculo}"`)
+    );
+    if (!r.ok) falhas++;
+  }
+  console.log('');
 }
 
-console.log('');
 if (falhas === 0) {
-  console.log(`TUDO CERTO: o robo sobreviveu ${PARTIDAS} partidas inteiras.`);
-  console.log('Nenhum obstaculo impossivel foi gerado ate a velocidade maxima.');
+  console.log(`TUDO CERTO: o robo sobreviveu ${PARTIDAS * MODOS.length} partidas inteiras,`);
+  console.log('nos dois modos de controle, ate a velocidade maxima.');
 } else {
-  console.log(`${falhas} de ${PARTIDAS} partidas terminaram em morte.`);
-  console.log('Isso indica espacamento curto demais ou obstaculo alto demais.');
+  console.log(`${falhas} de ${PARTIDAS * MODOS.length} partidas terminaram em morte.`);
+  console.log('Isso indica espacamento curto demais, obstaculo alto demais,');
+  console.log('ou tempo insuficiente para o gesto de deslize.');
   process.exitCode = 1;
 }

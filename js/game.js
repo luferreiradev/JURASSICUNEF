@@ -14,13 +14,20 @@ const Jogo = (function () {
   const JOGADOR_X = 150;       // o dino corre sempre nesta coluna
 
   const GRAV = 2400;           // px/s^2
-  const V_PULO = -820;         // apice de ~140px, ~0,68s no ar
+  const V_PULO = -910;         // apice de ~172px, ~0,76s no ar
   const CORTE_PULO = 0.42;     // soltar cedo corta a subida (pulo variavel)
   const COYOTE = 0.09;         // tolerancia depois de sair da borda
 
   const VEL_INI = 420;
   const VEL_MAX = 980;
   const ACEL = 16;             // px/s ganhos por segundo
+
+  // Os 8 quadros de corrida formam UMA passada completa (as duas pernas).
+  // Amarrar a cadencia direto na velocidade fazia as pernas baterem 6x por
+  // segundo no fim do jogo, virando borrao. Aqui ela vai de uma passada por
+  // segundo na largada a duas na velocidade maxima.
+  const CADENCIA_MIN = 9;      // quadros por segundo em VEL_INI
+  const CADENCIA_MAX = 17;     // quadros por segundo em VEL_MAX
 
   const ED = DINO.escala;      // escala das spritesheets do dino
   const EC = CENARIO.escala;   // escala do tileset do deserto
@@ -170,9 +177,10 @@ const Jogo = (function () {
 
   function deslizar(ativo) {
     if (est.modo !== 'jogo') return;
-    // No ar, deslizar puxa o dino para baixo: serve para descer rapido e
-    // encaixar embaixo de uma saliencia sem esperar a queda natural.
-    if (ativo && !est.noChao) est.vy += 420;
+    // O arrasto para baixo so e reconhecido uns 0,12s depois do toque, que ja
+    // disparou um pulo. Um mergulho forte devolve o dino ao chao em menos de
+    // 0,1s, a tempo de ele ainda passar deitado embaixo da saliencia.
+    if (ativo && !est.noChao) est.vy = Math.max(est.vy + 900, 1400);
     est.deslizando = ativo;
   }
 
@@ -190,9 +198,9 @@ const Jogo = (function () {
       o.hit = { dx: 8, dy: 6, l: l - 16, a: a - 6 };
     } else if (tipo.piche) {
       // A poca e a unica coisa cuja largura a gente escolhe, entao ela precisa
-      // caber num pulo. Um pulo dura 0,68s e cobre 0,42*velocidade a partir do
-      // momento em que o dino salta; tirando o corpo dele, sobra ~0,30*vel de
-      // vao seguro. Ficamos bem abaixo disso para dar margem a quem e humano.
+      // caber num pulo. Saltando 0,30s antes da borda, ainda restam 0,46s de ar,
+      // que cobrem 0,46*velocidade; tirando o corpo do dino sobra bem mais que
+      // isto aqui. Ficamos bem abaixo do limite para dar margem a quem e humano.
       const l = est.velocidade * (0.20 + Math.random() * 0.07);
       o = { tipo, x: MUNDO_L + 20, y: CHAO_Y - 6, l, a: 40 };
       o.hit = { dx: 14, dy: 2, l: l - 28, a: 36 };
@@ -206,9 +214,9 @@ const Jogo = (function () {
     est.obstaculos.push(o);
 
     // O espaco ate o proximo e medido em TEMPO, nao em pixels: assim continua
-    // passavel conforme a velocidade sobe. 0,85s > 0,68s de um pulo completo.
+    // passavel conforme a velocidade sobe. 0,95s > 0,76s de um pulo completo.
     const respiro = tipo.saliencia ? 0.35 : 0;   // sair do deslize custa tempo
-    est.ateProxObstaculo = est.velocidade * (0.85 + respiro + Math.random() * 0.55) + o.l;
+    est.ateProxObstaculo = est.velocidade * (0.95 + respiro + Math.random() * 0.55) + o.l;
   }
 
   function criarItem() {
@@ -489,13 +497,10 @@ const Jogo = (function () {
       quadro = subindo
         ? Math.min(anim.n - 1, Math.round(prog * (anim.n - 1)))
         : Math.min(anim.n - 1, Math.round((anim.n - 1) * (0.55 + (1 - prog) * 0.45)));
-    } else if (est.modo === 'demo') {
-      anim = DINO.correr;
-      quadro = Math.floor(est.animT * anim.fps) % anim.n;
     } else {
       anim = DINO.correr;
-      // A cadencia da corrida acompanha a velocidade do jogo.
-      const fps = anim.fps * (est.velocidade / VEL_INI) * 0.75;
+      const k = (est.velocidade - VEL_INI) / (VEL_MAX - VEL_INI);
+      const fps = CADENCIA_MIN + (CADENCIA_MAX - CADENCIA_MIN) * k;
       quadro = Math.floor(est.animT * fps) % anim.n;
     }
 

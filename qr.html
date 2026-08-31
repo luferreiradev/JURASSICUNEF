@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QR Code — JURASSIC UNEF</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A6%96%3C/text%3E%3C/svg%3E">
+<style>
+  :root { --areia: #e9b45f; --marrom: #2b1d10; --creme: #fff6e4; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; padding: 32px 20px;
+    background: var(--marrom); color: var(--creme);
+    font: 16px/1.55 'Segoe UI', system-ui, sans-serif;
+    display: flex; flex-direction: column; align-items: center; gap: 18px;
+  }
+  h1 { margin: 0; font-size: 24px; color: var(--areia); }
+  p.dica { margin: 0; max-width: 560px; text-align: center; opacity: .8; font-size: 14px; }
+  .painel {
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+    width: 100%; max-width: 620px;
+  }
+  input, select, button {
+    font: inherit; padding: 10px 14px; border-radius: 10px; border: 2px solid #5a4326;
+    background: #3a2a18; color: var(--creme);
+  }
+  input { flex: 1 1 320px; min-width: 0; }
+  button { background: var(--areia); color: var(--marrom); font-weight: 700; cursor: pointer; border-color: transparent; }
+  button:active { transform: translateY(2px); }
+  #moldura {
+    background: #fff; padding: 22px; border-radius: 16px;
+    display: flex; align-items: center; justify-content: center; min-height: 120px;
+  }
+  #moldura img, #moldura canvas { display: block; }
+  #legenda { font-size: 13px; opacity: .7; word-break: break-all; text-align: center; max-width: 560px; }
+  .erro { color: #ffb4a2; font-size: 14px; text-align: center; max-width: 560px; }
+</style>
+</head>
+<body>
+
+<h1>QR Code do JURASSIC UNEF</h1>
+<p class="dica">
+  Gera o código que os visitantes vão escanear. Confira o endereço abaixo, gere,
+  clique com o botão direito na imagem e salve — ou use o botão “Baixar PNG”.
+  Imprima com pelo menos 4 cm de lado e deixe uma margem branca em volta.
+</p>
+
+<div class="painel">
+  <input id="endereco" type="url" spellcheck="false" aria-label="Endereço do jogo">
+  <select id="tamanho" aria-label="Tamanho">
+    <option value="512">512 px (tela)</option>
+    <option value="1024" selected>1024 px (impressão)</option>
+    <option value="2048">2048 px (cartaz grande)</option>
+  </select>
+  <button id="btGerar" type="button">Gerar</button>
+  <button id="btBaixar" type="button">Baixar PNG</button>
+</div>
+
+<div id="moldura"><span style="color:#888">o código aparece aqui</span></div>
+<div id="legenda"></div>
+<div id="aviso" class="erro"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function () {
+  const moldura = document.getElementById('moldura');
+  const campo = document.getElementById('endereco');
+  const aviso = document.getElementById('aviso');
+
+  // Sugere o endereco do proprio jogo: esta pagina mora ao lado do index.html,
+  // entao basta trocar "qr.html" pela raiz.
+  campo.value = location.href.replace(/qr\.html.*$/, '');
+
+  function gerar() {
+    aviso.textContent = '';
+    moldura.innerHTML = '';
+    const texto = campo.value.trim();
+    if (!texto) { aviso.textContent = 'Escreva o endereço do jogo.'; return; }
+    if (typeof QRCode === 'undefined') {
+      aviso.textContent = 'A biblioteca de QR Code não carregou (sem internet?). '
+        + 'Alternativa: gere em qualquer site de QR Code usando o endereço acima.';
+      return;
+    }
+    const lado = parseInt(document.getElementById('tamanho').value, 10);
+    new QRCode(moldura, {
+      text: texto,
+      width: lado,
+      height: lado,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      // Correcao alta: o código continua legível mesmo amassado ou com o
+      // cartaz um pouco sujo, que é o cenário real de uma exposição.
+      correctLevel: QRCode.CorrectLevel.H,
+    });
+    // A biblioteca desenha grande demais para a tela; encolhe só na exibição.
+    const el = moldura.firstElementChild;
+    if (el) { el.style.width = '260px'; el.style.height = '260px'; }
+    document.getElementById('legenda').textContent = texto + '  ·  ' + lado + '×' + lado + ' px';
+  }
+
+  function baixar() {
+    const cv = moldura.querySelector('canvas');
+    if (!cv) { aviso.textContent = 'Gere o código primeiro.'; return; }
+    const a = document.createElement('a');
+    a.download = 'qrcode-jurassic-unef.png';
+    a.href = cv.toDataURL('image/png');
+    a.click();
+  }
+
+  document.getElementById('btGerar').addEventListener('click', gerar);
+  document.getElementById('btBaixar').addEventListener('click', baixar);
+  campo.addEventListener('keydown', (e) => { if (e.key === 'Enter') gerar(); });
+  window.addEventListener('load', gerar);
+})();
+</script>
+</body>
+</html>

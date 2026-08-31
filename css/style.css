@@ -1,0 +1,355 @@
+/* =========================================================================
+   JURASSIC UNEF — estilos
+   O jogo tem um mundo fixo de 960x540. O #palco so carrega o canvas, ja
+   escalado e com tarja preta em volta.
+
+   A interface (menu, placar, curiosidades) NAO fica dentro do palco: ela cobre
+   a janela inteira. Em retrato o canvas vira uma faixa de ~230px de altura, e
+   se o texto encolhesse junto a curiosidade sairia com 6px — ilegivel logo no
+   conteudo que e o objetivo do trabalho. O tamanho do texto vem de --ui, que
+   e a escala do canvas limitada a um piso e um teto (ver js/main.js).
+   ========================================================================= */
+
+:root {
+  --ui: 1;          /* escala da interface, definida por js/main.js */
+  --areia:        #e9b45f;
+  --areia-clara:  #f7dfae;
+  --creme:        #fff6e4;
+  --marrom:       #4a3520;
+  --marrom-forte: #2b1d10;
+  --verde:        #8cc63f;
+  --verde-forte:  #5f9021;
+  --sombra:       rgba(43, 29, 16, .82);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #2b1d10;
+  color: var(--creme);
+  font-family: 'Fredoka', 'Segoe UI', system-ui, sans-serif;
+  /* Nada de rolar, dar zoom por dois dedos ou selecionar texto sem querer:
+     tudo isso atrapalha um jogo jogado com o polegar. */
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+/* ---- Palco e canvas ---------------------------------------------------- */
+
+#palco {
+  position: relative;
+  z-index: 0;
+  box-shadow: 0 0 0 100vmax #2b1d10;   /* tarja fora da area do jogo */
+}
+
+#tela {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #cfe6f5;
+}
+
+.oculto { display: none !important; }
+
+/* ---- Telas cheias (menu, fim, sobre, carregando) ------------------------ */
+
+.tela {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--ui) * 14px);
+  padding: calc(var(--ui) * 24px);
+  text-align: center;
+  background: var(--sombra);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  animation: aparecer .22s ease-out;
+}
+
+@keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
+
+.marca {
+  margin: 0;
+  line-height: .92;
+  font-size: calc(var(--ui) * 68px);
+  font-weight: 700;
+  letter-spacing: calc(var(--ui) * 1px);
+  color: var(--creme);
+  /* Contorno grosso, no espirito da arte cartoon do jogo. */
+  text-shadow:
+    calc(var(--ui) *  3px) calc(var(--ui) * 3px) 0 var(--marrom-forte),
+    calc(var(--ui) * -2px) calc(var(--ui) * 2px) 0 var(--marrom-forte),
+    calc(var(--ui) *  2px) calc(var(--ui) * -2px) 0 var(--marrom-forte),
+    calc(var(--ui) * -2px) calc(var(--ui) * -2px) 0 var(--marrom-forte),
+    0 calc(var(--ui) * 9px) calc(var(--ui) * 14px) rgba(0, 0, 0, .45);
+}
+.marca span {
+  display: block;
+  color: var(--verde);
+  font-size: calc(var(--ui) * 46px);
+  letter-spacing: calc(var(--ui) * 10px);
+  margin-left: calc(var(--ui) * 10px);
+}
+
+.subtitulo {
+  margin: calc(var(--ui) * -4px) 0 0;
+  font-size: calc(var(--ui) * 19px);
+  font-weight: 500;
+  color: var(--areia-clara);
+}
+
+.titulo-fim {
+  margin: 0;
+  font-size: calc(var(--ui) * 34px);
+  font-weight: 700;
+  letter-spacing: calc(var(--ui) * 3px);
+  color: var(--areia);
+  text-shadow: calc(var(--ui) * 2px) calc(var(--ui) * 2px) 0 var(--marrom-forte);
+}
+
+/* ---- Botoes ------------------------------------------------------------- */
+
+.botao {
+  font: inherit;
+  font-weight: 700;
+  font-size: calc(var(--ui) * 24px);
+  letter-spacing: calc(var(--ui) * 2px);
+  color: var(--marrom-forte);
+  background: linear-gradient(#a8dd52, var(--verde));
+  border: 0;
+  border-radius: calc(var(--ui) * 16px);
+  padding: calc(var(--ui) * 13px) calc(var(--ui) * 40px);
+  cursor: pointer;
+  box-shadow: 0 calc(var(--ui) * 6px) 0 var(--verde-forte),
+              0 calc(var(--ui) * 10px) calc(var(--ui) * 16px) rgba(0, 0, 0, .4);
+  transition: transform .08s, box-shadow .08s;
+}
+.botao:active {
+  transform: translateY(calc(var(--ui) * 5px));
+  box-shadow: 0 calc(var(--ui) * 1px) 0 var(--verde-forte);
+}
+.botao.pequeno { font-size: calc(var(--ui) * 18px); padding: calc(var(--ui) * 10px) calc(var(--ui) * 28px); }
+
+.link {
+  font: inherit;
+  font-size: calc(var(--ui) * 15px);
+  color: var(--areia-clara);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  opacity: .85;
+  cursor: pointer;
+  padding: calc(var(--ui) * 6px);
+}
+
+.icone {
+  font-size: calc(var(--ui) * 20px);
+  line-height: 1;
+  background: rgba(43, 29, 16, .45);
+  border: 0;
+  border-radius: 50%;
+  width: calc(var(--ui) * 38px);
+  height: calc(var(--ui) * 38px);
+  cursor: pointer;
+  color: var(--creme);
+}
+
+/* ---- Ajuda do menu ------------------------------------------------------ */
+
+.ajuda {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: calc(var(--ui) * 15px);
+  line-height: 1.85;
+  color: var(--areia-clara);
+  opacity: .92;
+}
+.ajuda b { color: var(--creme); }
+
+/* ---- Carregando --------------------------------------------------------- */
+
+.barra {
+  width: calc(var(--ui) * 260px);
+  height: calc(var(--ui) * 12px);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .35);
+  overflow: hidden;
+}
+.barra i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--areia), var(--verde));
+  transition: width .18s;
+}
+
+/* ---- HUD ---------------------------------------------------------------- */
+
+#hud {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 5;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: calc(var(--ui) * 14px) calc(var(--ui) * 18px);
+  pointer-events: none;
+  text-shadow: 0 calc(var(--ui) * 2px) calc(var(--ui) * 5px) rgba(0, 0, 0, .55);
+}
+#hud button { pointer-events: auto; }
+
+.hud-esq { display: flex; flex-direction: column; line-height: 1; }
+#pontos {
+  font-size: calc(var(--ui) * 40px);
+  font-weight: 700;
+  color: var(--creme);
+}
+#pontos.marco { animation: pulo-placar .45s ease-out; }
+@keyframes pulo-placar {
+  0%   { transform: scale(1);    color: var(--creme); }
+  35%  { transform: scale(1.28); color: var(--verde); }
+  100% { transform: scale(1);    color: var(--creme); }
+}
+.hud-esq small {
+  font-size: calc(var(--ui) * 13px);
+  color: var(--areia-clara);
+  letter-spacing: calc(var(--ui) * 1px);
+  margin-top: calc(var(--ui) * 3px);
+}
+
+.hud-dir { display: flex; align-items: center; gap: calc(var(--ui) * 10px); }
+.ovos {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--ui) * 6px);
+  font-size: calc(var(--ui) * 22px);
+  font-weight: 700;
+}
+/* Iconezinho de ovo desenhado em CSS, para nao carregar mais um arquivo. */
+.ovos i {
+  width: calc(var(--ui) * 15px);
+  height: calc(var(--ui) * 20px);
+  background: var(--creme);
+  border: calc(var(--ui) * 2px) solid var(--marrom-forte);
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+}
+
+/* ---- Toast de curiosidade ----------------------------------------------- */
+
+#toast {
+  position: fixed;
+  z-index: 6;
+  left: 50%;
+  top: calc(var(--ui) * 76px);
+  transform: translateX(-50%);
+  width: min(calc(var(--ui) * 560px), 92vw);
+  padding: calc(var(--ui) * 12px) calc(var(--ui) * 18px);
+  border-radius: calc(var(--ui) * 14px);
+  background: rgba(43, 29, 16, .9);
+  border-left: calc(var(--ui) * 5px) solid var(--verde);
+  box-shadow: 0 calc(var(--ui) * 8px) calc(var(--ui) * 20px) rgba(0, 0, 0, .45);
+  text-align: left;
+  animation: entra-toast .3s cubic-bezier(.2, 1.3, .5, 1);
+  pointer-events: none;
+}
+@keyframes entra-toast {
+  from { opacity: 0; transform: translate(-50%, calc(var(--ui) * -18px)); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+#toast.saindo { opacity: 0; transition: opacity .35s; }
+#toastTitulo {
+  display: block;
+  font-size: calc(var(--ui) * 16px);
+  color: var(--verde);
+  margin-bottom: calc(var(--ui) * 3px);
+}
+#toastTexto {
+  margin: 0;
+  font-size: calc(var(--ui) * 14px);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--creme);
+}
+
+/* ---- Tela de fim -------------------------------------------------------- */
+
+.placar-fim { display: flex; align-items: baseline; gap: calc(var(--ui) * 8px); }
+.placar-fim span {
+  font-size: calc(var(--ui) * 64px);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--creme);
+}
+.placar-fim small { font-size: calc(var(--ui) * 17px); color: var(--areia-clara); }
+
+.resumo {
+  margin: calc(var(--ui) * -6px) 0 0;
+  font-size: calc(var(--ui) * 15px);
+  color: var(--areia-clara);
+}
+.resumo b { color: var(--creme); }
+
+.fato {
+  max-width: calc(var(--ui) * 520px);
+  padding: calc(var(--ui) * 12px) calc(var(--ui) * 18px);
+  border-radius: calc(var(--ui) * 14px);
+  background: rgba(0, 0, 0, .3);
+  border-left: calc(var(--ui) * 5px) solid var(--areia);
+  text-align: left;
+}
+.fato strong { display: block; font-size: calc(var(--ui) * 16px); color: var(--areia); }
+.fato p {
+  margin: calc(var(--ui) * 4px) 0 0;
+  font-size: calc(var(--ui) * 14px);
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+/* ---- Sobre --------------------------------------------------------------- */
+
+.texto-sobre {
+  max-width: calc(var(--ui) * 560px);
+  font-size: calc(var(--ui) * 15px);
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--areia-clara);
+  text-align: left;
+}
+.texto-sobre p { margin: 0 0 calc(var(--ui) * 10px); }
+.texto-sobre b { color: var(--creme); }
+.creditos { font-size: calc(var(--ui) * 13px); opacity: .8; }
+
+/* ---- Aviso de girar o celular -------------------------------------------- */
+
+#girar {
+  position: fixed;
+  z-index: 4;
+  bottom: calc(var(--ui) * 12px);
+  margin: 0;
+  font-size: 13px;
+  color: var(--areia-clara);
+  opacity: .6;
+  animation: respira 2.4s ease-in-out infinite;
+}
+@keyframes respira { 50% { opacity: .25; } }
+
+/* Quem preferir menos movimento nao leva animacao nenhuma. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}

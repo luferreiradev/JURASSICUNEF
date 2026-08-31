@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>JURASSIC UNEF — uma corrida pela Era Primitiva</title>
+<meta name="description" content="Joguinho interativo sobre a Era Primitiva. Corra, pule e colete ovos para descobrir curiosidades da pré-história. Projeto acadêmico UNEF.">
+<meta name="theme-color" content="#2b1d10">
+<meta property="og:title" content="JURASSIC UNEF">
+<meta property="og:description" content="Uma corrida pela Era Primitiva. Colete ovos e descubra curiosidades da pré-história.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A6%96%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="palco">
+  <canvas id="tela"></canvas>
+</div>
+
+<!-- Placar durante a partida -->
+<div id="hud" class="oculto">
+  <div class="hud-esq">
+    <span id="pontos">0</span>
+    <small>RECORDE <b id="recorde">0</b></small>
+  </div>
+  <div class="hud-dir">
+    <span class="ovos"><i></i><b id="ovos">0</b></span>
+    <button id="btSom" class="icone" type="button" aria-label="Ligar ou desligar o som">🔊</button>
+  </div>
+</div>
+
+<!-- Curiosidade que aparece ao pegar um ovo -->
+<div id="toast" class="oculto" role="status" aria-live="polite">
+  <strong id="toastTitulo"></strong>
+  <p id="toastTexto"></p>
+</div>
+
+<!-- Telas -->
+<div id="carregando" class="tela">
+  <h1 class="marca">JURASSIC<span>UNEF</span></h1>
+  <div class="barra"><i id="progresso"></i></div>
+</div>
+
+<div id="menu" class="tela oculto">
+  <h1 class="marca">JURASSIC<span>UNEF</span></h1>
+  <p class="subtitulo">Uma corrida pela Era Primitiva</p>
+  <button id="btJogar" class="botao" type="button">JOGAR</button>
+  <ul class="ajuda">
+    <li><b>toque na tela</b> ou <b>espaço</b> — pular</li>
+    <li><b>segure embaixo</b> ou <b>seta ↓</b> — deslizar</li>
+    <li>pegue os <b>ovos</b> e descubra curiosidades</li>
+  </ul>
+  <button id="btSobre" class="link" type="button">sobre o projeto</button>
+</div>
+
+<div id="fim" class="tela oculto">
+  <h2 class="titulo-fim">FIM DE JOGO</h2>
+  <div class="placar-fim">
+    <span id="fimPontos">0</span>
+    <small>pontos</small>
+  </div>
+  <p class="resumo">recorde <b id="fimRecorde">0</b> &nbsp;·&nbsp; ovos <b id="fimOvos">0</b></p>
+  <div class="fato">
+    <strong id="fimTitulo"></strong>
+    <p id="fimTexto"></p>
+  </div>
+  <button id="btDeNovo" class="botao" type="button">JOGAR DE NOVO</button>
+  <button id="btSobre2" class="link" type="button">sobre o projeto</button>
+</div>
+
+<div id="sobre" class="tela oculto">
+  <h2 class="titulo-fim">SOBRE O PROJETO</h2>
+  <div class="texto-sobre">
+    <p><b>JURASSIC UNEF</b> é um jogo interativo criado como trabalho acadêmico
+       com o tema <b>a Era Primitiva</b>.</p>
+    <p>A proposta é aproximar o visitante do conteúdo de um jeito leve: a cada
+       ovo de dinossauro coletado aparece uma curiosidade real sobre a
+       pré-história — do domínio do fogo às pinturas rupestres.</p>
+    <p class="creditos">
+      Integrantes: <b id="integrantes">—</b><br>
+      Arte: GameArt2D (licença CC0)<br>
+      Feito com HTML5 Canvas, sem nenhuma dependência externa.
+    </p>
+  </div>
+  <button id="btVoltar" class="botao pequeno" type="button">VOLTAR</button>
+</div>
+
+<p id="girar" class="oculto">↻ vire o celular para jogar em tela cheia</p>
+
+<script src="js/assets-dados.js"></script>
+<script src="js/assets.js"></script>
+<script src="js/curiosidades.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/game.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

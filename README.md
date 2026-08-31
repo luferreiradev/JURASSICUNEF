@@ -4,7 +4,9 @@ Jogo interativo em HTML5 sobre **a Era Primitiva**, feito como trabalho acadêmi
 O visitante escaneia um QR Code, o jogo abre direto no navegador do celular e,
 a cada ovo de dinossauro coletado, aparece uma curiosidade real sobre a pré-história.
 
-**Jogar:** _(preencher com o endereço do GitHub Pages depois de publicar)_
+**Jogar:** https://luferreiradev.github.io/JURASSICUNEF/
+
+O QR Code pronto para o cartaz está em [`qrcode.png`](qrcode.png) (1024×1024).
 
 ---
 
@@ -40,7 +42,8 @@ gh repo create JURASSICUNEF --public --source=. --remote=origin --push
 Depois, em **Settings → Pages**, escolher a branch `master` e a pasta `/ (root)`.
 O endereço fica `https://<usuário>.github.io/JURASSICUNEF/`.
 
-Com o site no ar, abrir `qr.html` no navegador para gerar o QR Code do cartaz.
+O QR Code já está gerado em `qrcode.png`. Se o endereço mudar, abrir `qr.html`
+no navegador para gerar outro.
 Imprimir com pelo menos 4 cm de lado e margem branca em volta.
 
 ## Estrutura
@@ -48,6 +51,7 @@ Imprimir com pelo menos 4 cm de lado e margem branca em volta.
 ```
 index.html              página do jogo
 qr.html                 gerador do QR Code (uso interno, não faz parte do jogo)
+qrcode.png              o QR Code já gerado, pronto para o cartaz
 css/style.css           interface: menu, placar, curiosidades
 js/assets-dados.js      GERADO — tamanhos e offsets dos sprites
 js/assets.js            carregamento das imagens

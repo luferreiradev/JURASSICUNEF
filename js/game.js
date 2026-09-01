@@ -29,7 +29,8 @@ const Jogo = (function () {
   const CADENCIA_MIN = 9;      // quadros por segundo em VEL_INI
   const CADENCIA_MAX = 17;     // quadros por segundo em VEL_MAX
 
-  const ED = DINO.escala;      // escala das spritesheets do dino
+  const EH = HEROI.escala;     // escala das folhas do cavernico
+  const EB = CHEFE.escala;     // escala da folha do chefe
   const EC = CENARIO.escala;   // escala do tileset do deserto
 
   /* ---- Obstaculos -------------------------------------------------------
@@ -45,9 +46,13 @@ const Jogo = (function () {
     { id: 'caveira',     arte: 'caveira',     distMin: 2200, peso: 2, recorte: [0.08, 0.12] },
     { id: 'saliencia',   saliencia: true,     distMin: 3200, peso: 2 },  // passa agachado
     { id: 'piche',       piche: true,         distMin: 4600, peso: 2 },  // passa pulando
+    { id: 'chefe',       chefe: true,         distMin: 3000, peso: 1 },  // o predador
   ];
 
-  const ALTURA_VAO = 66;       // folga por baixo da saliencia
+  // 92 e a folga que deixa o cavernico DEITADO (84px de desenho) passar sem
+  // entrar na pedra. Com 66 ele atravessava a rocha visualmente, mesmo com a
+  // colisao correta — e o jogador so ve o desenho.
+  const ALTURA_VAO = 92;
   // Nomes repetidos servem de peso: 'capim' aparece 3x mais que 'arvore'.
   const DECOR = [
     'arvore', 'arbusto', 'arbusto', 'galhos', 'galhos', 'capim', 'capim', 'capim',
@@ -196,6 +201,19 @@ const Jogo = (function () {
       const a = medida('saliencia-m').a;
       o = { tipo, tiles, x: MUNDO_L + 20, y: CHAO_Y - ALTURA_VAO - a, l, a };
       o.hit = { dx: 8, dy: 6, l: l - 16, a: a - 6 };
+    } else if (tipo.chefe) {
+      const l = CHEFE.lq * EB;
+      const a = CHEFE.aq * EB;
+      o = { tipo, x: MUNDO_L + 30, y: CHAO_Y - a, l, a };
+      // So o TRONCO baixo mata: cauda, pescoco e cabeca erguida ficam fora da
+      // colisao de proposito. Com os 205px inteiros valendo, o chefe viraria
+      // parede em vez de obstaculo.
+      //
+      // A largura tambem e curta por um motivo que nao e obvio: o tempo que se
+      // leva atravessando a caixa e largura/velocidade, entao um chefe largo e
+      // MAIS dificil devagar do que rapido. Com 115px de caixa o robo morria
+      // justamente nas primeiras aparicoes, quando o jogo ainda esta lento.
+      o.hit = { dx: l * 0.30, dy: a - 84, l: l * 0.34, a: 84 };
     } else if (tipo.piche) {
       // A poca e a unica coisa cuja largura a gente escolhe, entao ela precisa
       // caber num pulo. Saltando 0,30s antes da borda, ainda restam 0,46s de ar,
@@ -215,7 +233,8 @@ const Jogo = (function () {
 
     // O espaco ate o proximo e medido em TEMPO, nao em pixels: assim continua
     // passavel conforme a velocidade sobe. 0,95s > 0,76s de um pulo completo.
-    const respiro = tipo.saliencia ? 0.35 : 0;   // sair do deslize custa tempo
+    // O chefe e largo: sem folga extra o obstaculo seguinte chegava junto.
+    const respiro = tipo.saliencia ? 0.35 : (tipo.chefe ? 0.5 : 0);
     est.ateProxObstaculo = est.velocidade * (0.95 + respiro + Math.random() * 0.55) + o.l;
   }
 
@@ -480,16 +499,33 @@ const Jogo = (function () {
     ctx.restore();
   }
 
-  function desenharDino() {
+  // O chefe ja vem espelhado no arquivo, olhando para a esquerda: ele corre
+  // contra o jogador. A sombra e maior e mais forte que a do heroi, para o
+  // peso dele aparecer.
+  function desenharChefe(o) {
+    const img = Assets.img(CHEFE.arquivo);
+    if (!img) return;
+    const quadro = Math.floor(est.t * CHEFE.fps) % CHEFE.n;
+    ctx.save();
+    ctx.globalAlpha = 0.42;
+    ctx.fillStyle = '#100a10';
+    ctx.beginPath();
+    ctx.ellipse(o.x + o.l / 2, CHAO_Y + 6, o.l * 0.34, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    ctx.drawImage(img, quadro * CHEFE.lq, 0, CHEFE.lq, CHEFE.aq, o.x, o.y, o.l, o.a);
+  }
+
+  function desenharHeroi() {
     let anim, quadro;
     if (est.modo === 'fim') {
-      anim = DINO.morrer;
+      anim = HEROI.morrer;
       quadro = Math.min(anim.n - 1, Math.floor(est.tempoMorte * anim.fps));
     } else if (est.deslizando && est.noChao) {
-      anim = DINO.deslizar;
+      anim = HEROI.deslizar;
       quadro = 0;
     } else if (!est.noChao) {
-      anim = DINO.pular;
+      anim = HEROI.pular;
       // O pulo nao fica em loop: mapeia a altura atual para o quadro certo,
       // entao a pose acompanha a subida e a descida.
       const prog = Math.min(1, Math.max(0, (CHAO_Y - est.py) / 140));
@@ -498,7 +534,7 @@ const Jogo = (function () {
         ? Math.min(anim.n - 1, Math.round(prog * (anim.n - 1)))
         : Math.min(anim.n - 1, Math.round((anim.n - 1) * (0.55 + (1 - prog) * 0.45)));
     } else {
-      anim = DINO.correr;
+      anim = HEROI.correr;
       const k = (est.velocidade - VEL_INI) / (VEL_MAX - VEL_INI);
       const fps = CADENCIA_MIN + (CADENCIA_MAX - CADENCIA_MIN) * k;
       quadro = Math.floor(est.animT * fps) % anim.n;
@@ -507,12 +543,12 @@ const Jogo = (function () {
     const img = Assets.img(anim.arquivo);
     if (!img) return;
 
-    // Sombra: encolhe conforme o dino sobe, dando nocao de altura.
+    // Sombra: encolhe conforme o heroi sobe, dando nocao de altura.
     const altura = CHAO_Y - est.py;
     const k = Math.max(0.3, 1 - altura / 260);
     ctx.save();
-    ctx.globalAlpha = 0.13 * k;
-    ctx.fillStyle = '#5a3d1c';
+    ctx.globalAlpha = 0.34 * k;
+    ctx.fillStyle = '#120b12';
     ctx.beginPath();
     ctx.ellipse(JOGADOR_X + 6, CHAO_Y + 5, 52 * k, 7 * k, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -521,8 +557,8 @@ const Jogo = (function () {
     ctx.drawImage(
       img,
       quadro * anim.lq, 0, anim.lq, anim.aq,
-      JOGADOR_X + anim.dx * ED, est.py + anim.dy * ED,
-      anim.lq * ED, anim.aq * ED
+      JOGADOR_X + anim.dx * EH, est.py + anim.dy * EH,
+      anim.lq * EH, anim.aq * EH
     );
   }
 
@@ -569,6 +605,7 @@ const Jogo = (function () {
     for (const o of est.obstaculos) {
       if (o.tipo.piche) continue;
       if (o.tipo.saliencia) { desenharSaliencia(o); continue; }
+      if (o.tipo.chefe) { desenharChefe(o); continue; }
       const img = Assets.img(o.arte.img);
       if (img) ctx.drawImage(img, o.x, o.y, o.l, o.a);
     }
@@ -578,7 +615,7 @@ const Jogo = (function () {
       desenharOvo(it.x, it.y + flutua);
     }
 
-    desenharDino();
+    desenharHeroi();
 
     // Filtro de cor do horario. Multiply preserva as formas e so muda o tom.
     if (amb.forca > 0.01) {

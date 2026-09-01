@@ -1,7 +1,8 @@
 /* =========================================================================
    JURASSIC UNEF — carregamento das imagens
-   Le a lista de arquivos direto dos metadados gerados (js/assets-dados.js),
-   entao nao existe lista duplicada para esquecer de atualizar.
+   Le a lista de arquivos direto dos metadados gerados (js/assets-dados.js e
+   js/assets-homem.js), entao nao existe lista duplicada para esquecer de
+   atualizar quando uma animacao nova aparece.
    ========================================================================= */
 
 const Assets = (function () {
@@ -10,8 +11,8 @@ const Assets = (function () {
   let total = 0;
 
   function arquivos() {
-    const lista = [];
-    for (const nome in DINO) if (nome !== 'escala') lista.push(DINO[nome].arquivo);
+    const lista = [CHEFE.arquivo];
+    for (const nome in HEROI) if (nome !== 'escala') lista.push(HEROI[nome].arquivo);
     for (const nome in CENARIO) if (nome !== 'escala') lista.push(CENARIO[nome].arquivo);
     return lista;
   }

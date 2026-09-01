@@ -1,55 +1,15 @@
 /* GERADO POR ferramentas/preparar-assets.js — nao edite a mao.
    Arte: GameArt2D (CC0 / dominio publico) — free dino sprites + free desert tileset.
-   Cada entrada traz o tamanho do quadro e o deslocamento ja calculado em
-   relacao a ancora do personagem (centro dos pes). */
+   CHEFE ancora pelo centro da base; o cenario traz largura e altura crus.
+   O jogador (HEROI) vive em js/assets-homem.js. */
 
-const DINO = {
-  "correr": {
-    "arquivo": "dino-correr.png",
-    "n": 8,
-    "lq": 214,
-    "aq": 220,
-    "fps": 15,
-    "dx": -107,
-    "dy": -220
-  },
-  "pular": {
-    "arquivo": "dino-pular.png",
-    "n": 6,
-    "lq": 216,
-    "aq": 210,
-    "fps": 12,
-    "dx": -108,
-    "dy": -214
-  },
-  "parado": {
-    "arquivo": "dino-parado.png",
-    "n": 10,
-    "lq": 181,
-    "aq": 190,
-    "fps": 10,
-    "dx": -108,
-    "dy": -207
-  },
-  "deslizar": {
-    "arquivo": "dino-deslizar.png",
-    "n": 1,
-    "lq": 268,
-    "aq": 98,
-    "fps": 1,
-    "dx": -58,
-    "dy": -98
-  },
-  "morrer": {
-    "arquivo": "dino-morrer.png",
-    "n": 8,
-    "lq": 306,
-    "aq": 194,
-    "fps": 12,
-    "dx": -95,
-    "dy": -189
-  },
-  "escala": 0.6
+const CHEFE = {
+  "arquivo": "chefe-correr.png",
+  "n": 8,
+  "lq": 291,
+  "aq": 300,
+  "fps": 14,
+  "escala": 0.6833333333333333
 };
 
 const CENARIO = {

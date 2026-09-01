@@ -28,16 +28,17 @@ const ler = (p) => fs.readFileSync(path.join(RAIZ, p), 'utf8');
    Os arquivos declaram `const X = ...` no topo, entao envolvemos cada um
    numa funcao e devolvemos o que interessa.                               */
 
-const { DINO, CENARIO } = new Function(ler('js/assets-dados.js') + '\n; return { DINO, CENARIO };')();
+const { CHEFE, CENARIO } = new Function(ler('js/assets-dados.js') + '\n; return { CHEFE, CENARIO };')();
+const { HEROI } = new Function(ler('js/assets-homem.js') + '\n; return { HEROI };')();
 
 const Som = { destravar() {}, pulo() {}, coleta() {}, dano() {}, marco() {} };
 const Curiosidades = { sortear: () => ({ titulo: '', texto: '' }) };
 const Assets = { img: () => null };
 
 const Jogo = new Function(
-  'DINO', 'CENARIO', 'Som', 'Curiosidades', 'Assets',
+  'HEROI', 'CHEFE', 'CENARIO', 'Som', 'Curiosidades', 'Assets',
   ler('js/game.js') + '\n; return Jogo;'
-)(DINO, CENARIO, Som, Curiosidades, Assets);
+)(HEROI, CHEFE, CENARIO, Som, Curiosidades, Assets);
 
 /* ---- O robo --------------------------------------------------------------
    Joga so com o que um jogador ve: posicao e largura do que vem pela frente.

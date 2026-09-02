@@ -8,7 +8,7 @@ Você é um **homem das cavernas** correndo com um tacape por
 uma paisagem vulcânica, desviando de pedras, cactos, poças de piche e de um
 **dinossauro predador** que vem de frente.
 
-**Jogar:** https://luferreiradev.github.io/JURASSICUNEF/
+**Jogar:** https://luferreiradev.github.io/JURASSICUNEF/?v=2
 
 O QR Code pronto para o cartaz está em [`qrcode.png`](qrcode.png) (1024×1024).
 

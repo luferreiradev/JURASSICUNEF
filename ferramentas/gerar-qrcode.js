@@ -14,7 +14,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 const raiz = path.join(__dirname, '..');
-const endereco = process.argv[2] || 'https://luferreiradev.github.io/JURASSICUNEF/';
+const endereco = process.argv[2] || 'https://luferreiradev.github.io/JURASSICUNEF/?v=2';
 const saida = path.resolve(process.argv[3] || path.join(raiz, 'qrcode.png'));
 const pagina = path.join(raiz, 'qr.html');
 const porta = 9334;

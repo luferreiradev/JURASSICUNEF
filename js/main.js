@@ -153,7 +153,11 @@
 
   document.addEventListener('keydown', (e) => {
     if (e.repeat) return;
-    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+    if (e.code === 'Space' || e.code === 'KeyX') {
+      e.preventDefault();
+      if (estado === 'jogo') Jogo.atacar();
+      else acaoPrincipal();
+    } else if (e.code === 'ArrowUp' || e.code === 'KeyW') {
       e.preventDefault();
       acaoPrincipal();
     } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
@@ -165,7 +169,7 @@
   });
 
   document.addEventListener('keyup', (e) => {
-    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') Jogo.soltarPulo();
+    if (e.code === 'ArrowUp' || e.code === 'KeyW') Jogo.soltarPulo();
     else if (e.code === 'ArrowDown' || e.code === 'KeyS') Jogo.deslizar(false);
   });
 
@@ -206,6 +210,7 @@
 
   $('btJogar').addEventListener('click', comecarPartida);
   $('btDeNovo').addEventListener('click', () => { if (podeReiniciar()) comecarPartida(); });
+  $('btAtacar').addEventListener('click', (e) => { e.stopPropagation(); Jogo.atacar(); });
   $('btSobre').addEventListener('click', () => irPara('sobre'));
   $('btSobre2').addEventListener('click', () => irPara('sobre'));
   $('btVoltar').addEventListener('click', irParaMenu);

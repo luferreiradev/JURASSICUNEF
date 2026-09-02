@@ -1,41 +1,13 @@
-/* GERADO POR ferramentas/desenhar-cavernico.js — nao edite a mao. */
+/* EXPORTADO DO PRESET V2 por ferramentas/importar-preset-html.js. */
 
 const HEROI = {
-  "correr": {
-    "arquivo": "homem-correr.png",
-    "n": 8,
-    "lq": 158,
-    "aq": 220,
-    "fps": 14,
-    "dx": -79,
-    "dy": -220
-  },
-  "pular": {
-    "arquivo": "homem-pular.png",
-    "n": 3,
-    "lq": 111,
-    "aq": 211,
-    "fps": 10,
-    "dx": -60,
-    "dy": -222
-  },
-  "deslizar": {
-    "arquivo": "homem-deslizar.png",
-    "n": 1,
-    "lq": 193,
-    "aq": 140,
-    "fps": 1,
-    "dx": -111,
-    "dy": -140
-  },
-  "morrer": {
-    "arquivo": "homem-morrer.png",
-    "n": 1,
-    "lq": 179,
-    "aq": 179,
-    "fps": 6,
-    "dx": -107,
-    "dy": -179
-  },
-  "escala": 0.6
+  parado:   { arquivo: 'homem-das-cavernas.png', linha: 0, coluna: 0, n: 6,  lq: 152, aq: 152, fps: 8,  dx: -76, dy: -140 },
+  correr:   { arquivo: 'homem-das-cavernas.png', linha: 1, coluna: 0, n: 8,  lq: 152, aq: 152, fps: 14, dx: -76, dy: -140 },
+  deslizar: { arquivo: 'homem-das-cavernas.png', linha: 2, coluna: 0, n: 4,  lq: 152, aq: 152, fps: 10, dx: -76, dy: -140 },
+  atacar:   { arquivo: 'homem-das-cavernas.png', linha: 3, coluna: 0, n: 12, lq: 152, aq: 152, fps: 18, dx: -76, dy: -140 },
+  pular:    { arquivo: 'homem-das-cavernas.png', linha: 4, coluna: 0, n: 5,  lq: 152, aq: 152, fps: 10, dx: -76, dy: -140 },
+  // O preset nao traz uma linha de morte. Um quadro horizontal do giro do
+  // ataque funciona como queda sem misturar o personagem antigo ao novo.
+  morrer:   { arquivo: 'homem-das-cavernas.png', linha: 3, coluna: 7, n: 1,  lq: 152, aq: 152, fps: 1,  dx: -76, dy: -140 },
+  escala: 1,
 };

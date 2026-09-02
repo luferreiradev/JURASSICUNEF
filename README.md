@@ -4,7 +4,7 @@ Jogo interativo em HTML5 sobre **a Era Primitiva**, feito como trabalho acadêmi
 O visitante escaneia um QR Code, o jogo abre direto no navegador do celular e,
 a cada ovo de dinossauro coletado, aparece uma curiosidade real sobre a pré-história.
 
-Você é um **homem das cavernas** correndo com um dente de dinossauro na mão por
+Você é um **homem das cavernas** correndo com um tacape por
 uma paisagem vulcânica, desviando de pedras, cactos, poças de piche e de um
 **dinossauro predador** que vem de frente.
 
@@ -18,12 +18,15 @@ O QR Code pronto para o cartaz está em [`qrcode.png`](qrcode.png) (1024×1024).
 
 | Ação | Celular | Computador |
 |---|---|---|
-| Pular | toque na parte de cima da tela | `Espaço`, `↑` ou `W` |
-| Pular mais alto | segure o toque | segure a tecla |
+| Pular | toque na tela | `↑` ou `W` |
+| Pular mais alto | segure o toque | segure a tecla de pulo |
 | Deslizar (passar por baixo da saliência) | arraste o dedo para baixo | `↓` ou `S` |
+| Bater com o tacape | botão **BATER** | `Espaço` ou `X` |
 
 Pegue os **ovos** para somar pontos e desbloquear curiosidades. A velocidade
 aumenta com a distância e o cenário passa por um ciclo de dia e noite.
+O tacape quebra obstáculos sólidos (inclusive o predador), mas não elimina a
+poça de piche nem a saliência: esses continuam exigindo pulo e deslize.
 
 Os obstáculos vão sendo apresentados aos poucos conforme você avança: pedra e
 cacto desde o começo, saliência de rocha (que exige deslizar) a partir dos
@@ -62,16 +65,18 @@ qr.html                 gerador do QR Code (uso interno, não faz parte do jogo)
 qrcode.png              o QR Code já gerado, pronto para o cartaz
 css/style.css           interface: menu, placar, curiosidades
 js/assets-dados.js      GERADO — o chefe e o cenário
-js/assets-homem.js      GERADO — as animações do homem das cavernas
+js/assets-homem.js      metadados da folha de sprites do homem das cavernas
 js/assets.js            carregamento das imagens
 js/curiosidades.js      os fatos sobre a Era Primitiva
 js/audio.js             efeitos sonoros gerados por Web Audio (sem arquivos)
+js/cenario-vulcanico.js vulcão, lava, meteoros, fumaça e cinzas animados
 js/game.js              motor: física, obstáculos, colisão, cenário
 js/main.js              telas, controles e laço principal
 assets/                 GERADO — sprites e tiles já recortados
 ferramentas/            scripts de apoio (não vão para o navegador)
   preparar-assets.js      recorta o cenário, repinta no estilo vulcânico e monta o chefe
-  desenhar-cavernico.js   desenha e anima o personagem principal
+  importar-preset-html.js exporta sprites/metadados do preset HTML fornecido
+  gerar-qrcode.js          regenera o QR Code público em 1024×1024
   teste-jogabilidade.js   robô que joga sozinho para provar que dá para passar
 ```
 
@@ -117,24 +122,21 @@ e olho âmbar. O olho é o que mais muda a leitura — azul claro é simpático.
 
 ### O que foi desenhado aqui
 
-Nenhum pacote gratuito tem um homem das cavernas, então ele é desenhado por
-código em `ferramentas/desenhar-cavernico.js`. Não são oito figuras: é **um boneco
-articulado** (cabeça, torso, coxa, canela, pé, braço, antebraço) montado em SVG e
-animado por ângulos de junta — que é como animação 2D de jogo é feita de verdade.
-Desenhar quadro a quadro à mão produziria oito bonecos ligeiramente diferentes e a
-animação tremeria.
+O personagem vem do preset `homem-das-cavernas-v2.html`: um sprite pixel-art
+articulado, exportado em uma folha única com as animações de parado, corrida,
+deslize, ataque e pulo. A folha e seus metadados ficam em `assets/`.
 
 O ovo colecionável e a poça de piche também são desenhados no canvas, em `js/game.js`.
 
 ### Tamanho
 
-Os PNGs originais somam ~10 MB; a pasta `assets/` fica em **~270 KB** — o que
+Os PNGs originais somam ~10 MB; a pasta `assets/` fica em **~380 KB** — o que
 importa para quem escaneia o QR Code no 4G. Para regerar:
 
 ```bash
 npm i sharp
 node ferramentas/preparar-assets.js <pasta>/dino/png <pasta>/desert/png
-node ferramentas/desenhar-cavernico.js
+node ferramentas/importar-preset-html.js caminho/para/homem-das-cavernas-v2.html
 ```
 
 ## Créditos

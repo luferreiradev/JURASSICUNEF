@@ -70,7 +70,9 @@
 
   // Sugere o endereco do proprio jogo: esta pagina mora ao lado do index.html,
   // entao basta trocar "qr.html" pela raiz.
-  campo.value = location.href.replace(/qr\.html.*$/, '');
+  campo.value = location.protocol === 'file:'
+    ? 'https://luferreiradev.github.io/JURASSICUNEF/'
+    : location.href.replace(/qr\.html.*$/, '');
 
   function gerar() {
     aviso.textContent = '';

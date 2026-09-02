@@ -1,0 +1,202 @@
+{
+  "name": "homem_das_cavernas",
+  "version": 3,
+  "source": "sprite 64x64 fornecido pelo usuario",
+  "sheet": {
+    "file": "homem-das-cavernas.png",
+    "cell": [
+      152,
+      152
+    ],
+    "scale": 2,
+    "columns": 12,
+    "rows": 5
+  },
+  "origin": [
+    76,
+    140
+  ],
+  "hitbox": {
+    "x": -32,
+    "y": -124,
+    "w": 66,
+    "h": 124
+  },
+  "attackHitbox": {
+    "activeFrom": 0.34,
+    "activeTo": 0.62,
+    "size": 40,
+    "note": "segue a ponta do bastao"
+  },
+  "animations": {
+    "idle": {
+      "row": 0,
+      "frames": 6,
+      "fps": 8,
+      "loop": true,
+      "nextOnEnd": null
+    },
+    "run": {
+      "row": 1,
+      "frames": 8,
+      "fps": 14,
+      "loop": true,
+      "nextOnEnd": null
+    },
+    "slide": {
+      "row": 2,
+      "frames": 4,
+      "fps": 10,
+      "loop": true,
+      "nextOnEnd": null
+    },
+    "attack": {
+      "row": 3,
+      "frames": 12,
+      "fps": 18,
+      "loop": false,
+      "nextOnEnd": "idle"
+    },
+    "jump": {
+      "row": 4,
+      "frames": 5,
+      "fps": 10,
+      "loop": false,
+      "nextOnEnd": "idle"
+    }
+  },
+  "world": {
+    "nativeWidth": 384,
+    "nativeHeight": 216,
+    "groundY": 176,
+    "runSpeedPxPerSec": 80,
+    "slideSpeedPxPerSec": 102,
+    "jumpHeightPx": 40
+  },
+  "rig": {
+    "pivots": {
+      "body": [
+        0,
+        0
+      ],
+      "armL_u": [
+        9,
+        2
+      ],
+      "armL_f": [
+        6,
+        0
+      ],
+      "armR_u": [
+        5,
+        2
+      ],
+      "armR_f": [
+        8,
+        0
+      ],
+      "legL_t": [
+        6,
+        7
+      ],
+      "legL_s": [
+        6,
+        0
+      ],
+      "legR_t": [
+        6,
+        7
+      ],
+      "legR_s": [
+        4,
+        0
+      ],
+      "club": [
+        6,
+        7
+      ]
+    },
+    "anchors": {
+      "body": [
+        0,
+        0
+      ],
+      "armL_u": [
+        -10,
+        -46
+      ],
+      "armL_f": [
+        -13,
+        -32
+      ],
+      "armR_u": [
+        10,
+        -46
+      ],
+      "armR_f": [
+        13,
+        -32
+      ],
+      "legL_t": [
+        -5,
+        -16
+      ],
+      "legL_s": [
+        -5,
+        -8
+      ],
+      "legR_t": [
+        8,
+        -16
+      ],
+      "legR_s": [
+        8,
+        -9
+      ],
+      "club": [
+        0,
+        0
+      ]
+    },
+    "restAngles": {
+      "armL_u": -0.21109333322274654,
+      "armL_f": 0,
+      "armR_u": 0.21109333322274654,
+      "armR_f": 0,
+      "legL_t": 0,
+      "legL_s": 0,
+      "legR_t": 0,
+      "legR_s": 0
+    },
+    "handRight": [
+      15,
+      -22
+    ],
+    "clubBack": {
+      "pos": [
+        -1,
+        -30
+      ],
+      "ang": -2.35
+    }
+  },
+  "palette": [
+    "#312420",
+    "#402924",
+    "#221916",
+    "#472c27",
+    "#744c3a",
+    "#51312a",
+    "#482b26",
+    "#f8d1b0",
+    "#e79684",
+    "#0d0805",
+    "#804e3d",
+    "#714838",
+    "#f8c19e",
+    "#0e0705",
+    "#c4796a",
+    "#a96559",
+    "#0e0b07"
+  ]
+}

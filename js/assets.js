@@ -14,7 +14,9 @@ const Assets = (function () {
     const lista = [CHEFE.arquivo];
     for (const nome in HEROI) if (nome !== 'escala') lista.push(HEROI[nome].arquivo);
     for (const nome in CENARIO) if (nome !== 'escala') lista.push(CENARIO[nome].arquivo);
-    return lista;
+    // O preset v2 guarda todas as animacoes na mesma folha. Evita baixar a
+    // mesma imagem uma vez para cada estado.
+    return [...new Set(lista)];
   }
 
   function carregar(aoProgresso) {

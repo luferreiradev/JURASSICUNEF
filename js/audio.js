@@ -38,6 +38,8 @@ const Som = (function () {
   return {
     destravar,
     pulo()    { bipe(320, 620, 0.12, 'square', 0.12); },
+    ataque()  { bipe(170, 70, 0.14, 'sawtooth', 0.11); },
+    impacto() { bipe(95, 42, 0.11, 'square', 0.14); },
     coleta()  { bipe(660, 1180, 0.16, 'sine', 0.16); },
     dano()    { bipe(180, 45, 0.45, 'sawtooth', 0.20); },
     marco()   { bipe(880, 880, 0.07, 'square', 0.10); setTimeout(() => bipe(1320, 1320, 0.09, 'square', 0.10), 90); },

@@ -31,14 +31,15 @@ const ler = (p) => fs.readFileSync(path.join(RAIZ, p), 'utf8');
 const { CHEFE, CENARIO } = new Function(ler('js/assets-dados.js') + '\n; return { CHEFE, CENARIO };')();
 const { HEROI } = new Function(ler('js/assets-homem.js') + '\n; return { HEROI };')();
 
-const Som = { destravar() {}, pulo() {}, coleta() {}, dano() {}, marco() {} };
+const Som = { destravar() {}, pulo() {}, ataque() {}, impacto() {}, coleta() {}, dano() {}, marco() {} };
 const Curiosidades = { sortear: () => ({ titulo: '', texto: '' }) };
 const Assets = { img: () => null };
+const CenarioVulcanico = { atualizar() {}, impacto() {}, desenharFundo() {}, desenharFrente() {} };
 
 const Jogo = new Function(
-  'HEROI', 'CHEFE', 'CENARIO', 'Som', 'Curiosidades', 'Assets',
+  'HEROI', 'CHEFE', 'CENARIO', 'Som', 'Curiosidades', 'Assets', 'CenarioVulcanico',
   ler('js/game.js') + '\n; return Jogo;'
-)(HEROI, CHEFE, CENARIO, Som, Curiosidades, Assets);
+)(HEROI, CHEFE, CENARIO, Som, Curiosidades, Assets, CenarioVulcanico);
 
 /* ---- O robo --------------------------------------------------------------
    Joga so com o que um jogador ve: posicao e largura do que vem pela frente.
@@ -189,6 +190,20 @@ for (const [modo, descricao] of MODOS) {
   }
   console.log('');
 }
+
+// A nova animacao de ataque precisa ter efeito de jogo: durante a janela do
+// tacape, um obstaculo comum a frente deve ser removido sem matar o jogador.
+Jogo.novaPartida();
+Jogo.depuracao.obstaculos.push({
+  tipo: { id: 'alvo-teste' },
+  x: JOGADOR_X + 250, y: 390, l: 40, a: 60,
+  hit: { dx: 0, dy: 0, l: 40, a: 60 },
+});
+Jogo.atacar();
+for (let i = 0; i < 36 && Jogo.modo === 'jogo'; i++) Jogo.atualizar(PASSO);
+const ataqueOk = Jogo.modo === 'jogo' && Jogo.depuracao.obstaculos.length === 0;
+console.log(`[ataque] ${ataqueOk ? 'ok   tacape destruiu o obstaculo' : 'FALHA no alcance/janela do tacape'}\n`);
+if (!ataqueOk) falhas++;
 
 if (falhas === 0) {
   console.log(`TUDO CERTO: o robo sobreviveu ${PARTIDAS * MODOS.length} partidas inteiras,`);

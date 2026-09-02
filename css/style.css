@@ -62,6 +62,8 @@ html, body {
   width: 100%;
   height: 100%;
   background: #2a1428;   /* mesma familia do ceu vulcanico, enquanto carrega */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 .oculto { display: none !important; }
@@ -218,6 +220,28 @@ html, body {
   text-shadow: 0 calc(var(--ui) * 2px) calc(var(--ui) * 5px) rgba(0, 0, 0, .55);
 }
 #hud button { pointer-events: auto; }
+
+#btAtacar {
+  position: fixed;
+  right: max(calc(var(--ui) * 18px), env(safe-area-inset-right));
+  bottom: max(calc(var(--ui) * 18px), env(safe-area-inset-bottom));
+  width: calc(var(--ui) * 78px);
+  height: calc(var(--ui) * 78px);
+  border: calc(var(--ui) * 3px) solid #ffc247;
+  border-radius: 50%;
+  color: #fff3e0;
+  background: radial-gradient(circle at 40% 32%, #e35b1c, #8f2205 72%);
+  box-shadow: 0 calc(var(--ui) * 5px) 0 #4a1206,
+              0 0 calc(var(--ui) * 18px) rgba(255, 95, 20, .46);
+  font: 700 calc(var(--ui) * 15px)/1 'Fredoka', sans-serif;
+  letter-spacing: calc(var(--ui) * .5px);
+  text-shadow: 0 calc(var(--ui) * 2px) 0 #4a1206;
+  cursor: pointer;
+}
+#btAtacar:active {
+  transform: translateY(calc(var(--ui) * 4px));
+  box-shadow: 0 calc(var(--ui) * 1px) 0 #4a1206;
+}
 
 .hud-esq { display: flex; flex-direction: column; line-height: 1; }
 #pontos {

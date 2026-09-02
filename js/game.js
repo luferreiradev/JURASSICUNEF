@@ -29,6 +29,10 @@ const Jogo = (function () {
   const CADENCIA_MIN = 9;      // quadros por segundo em VEL_INI
   const CADENCIA_MAX = 17;     // quadros por segundo em VEL_MAX
 
+  const DURACAO_ATAQUE = 0.88;
+  const ATAQUE_ATIVO_DE = 0.34;
+  const ATAQUE_ATIVO_ATE = 0.62;
+
   const EH = HEROI.escala;     // escala das folhas do cavernico
   const EB = CHEFE.escala;     // escala da folha do chefe
   const EC = CENARIO.escala;   // escala do tileset do deserto
@@ -83,6 +87,7 @@ const Jogo = (function () {
     distancia: 0,
     velocidade: VEL_INI,
     pontos: 0,
+    bonus: 0,
     ovos: 0,
     proxMarco: 250,
 
@@ -91,6 +96,8 @@ const Jogo = (function () {
     noChao: true,
     deslizando: false,
     segurandoPulo: false,
+    atacando: false,
+    tempoAtaque: 0,
     coyote: 0,
     animT: 0,
     tempoMorte: 0,
@@ -142,6 +149,7 @@ const Jogo = (function () {
     est.distancia = 0;
     est.velocidade = VEL_INI;
     est.pontos = 0;
+    est.bonus = 0;
     est.ovos = 0;
     est.proxMarco = 250;
     est.py = CHAO_Y;
@@ -149,6 +157,8 @@ const Jogo = (function () {
     est.noChao = true;
     est.deslizando = false;
     est.segurandoPulo = false;
+    est.atacando = false;
+    est.tempoAtaque = 0;
     est.coyote = 0;
     est.tempoMorte = 0;
     est.obstaculos.length = 0;
@@ -187,6 +197,14 @@ const Jogo = (function () {
     // 0,1s, a tempo de ele ainda passar deitado embaixo da saliencia.
     if (ativo && !est.noChao) est.vy = Math.max(est.vy + 900, 1400);
     est.deslizando = ativo;
+  }
+
+  function atacar() {
+    if (est.modo !== 'jogo' || est.atacando) return;
+    if (est.noChao) est.deslizando = false;
+    est.atacando = true;
+    est.tempoAtaque = 0;
+    Som.ataque();
   }
 
   /* ---- Geracao ----------------------------------------------------------- */
@@ -272,13 +290,22 @@ const Jogo = (function () {
     if (est.deslizando && est.noChao) {
       return { x: JOGADOR_X - 24, y: est.py - 50, w: 104, h: 50 };
     }
-    return { x: JOGADOR_X - 32, y: est.py - 112, w: 68, h: 112 };
+    return { x: JOGADOR_X - 32, y: est.py - 124, w: 66, h: 124 };
+  }
+
+  function caixaAtaque() {
+    const fase = est.tempoAtaque / DURACAO_ATAQUE;
+    if (!est.atacando || fase < ATAQUE_ATIVO_DE || fase > ATAQUE_ATIVO_ATE) return null;
+    // A ponta do tacape percorre a frente do personagem durante estes quadros.
+    // A caixa e deliberadamente generosa para continuar utilizavel no celular.
+    return { x: JOGADOR_X + 12, y: est.py - 122, w: 142, h: 120 };
   }
 
   /* ---- Atualizacao -------------------------------------------------------- */
 
   function atualizar(dt) {
     est.t += dt;
+    CenarioVulcanico.atualizar(dt, est.velocidade);
 
     if (est.modo === 'fim') {
       est.tempoMorte += dt;
@@ -299,6 +326,14 @@ const Jogo = (function () {
     const avanco = est.velocidade * dt;
     est.distancia += avanco;
     est.animT += dt;
+
+    if (est.atacando) {
+      est.tempoAtaque += dt;
+      if (est.tempoAtaque >= DURACAO_ATAQUE) {
+        est.atacando = false;
+        est.tempoAtaque = 0;
+      }
+    }
 
     // Fisica vertical
     if (!est.noChao) {
@@ -329,12 +364,21 @@ const Jogo = (function () {
     if (est.ateProxItem <= 0) criarItem();
 
     const eu = caixaJogador();
+    const golpe = caixaAtaque();
 
     for (let i = est.obstaculos.length - 1; i >= 0; i--) {
       const o = est.obstaculos[i];
       o.x -= avanco;
       if (o.x + o.l < -60) { est.obstaculos.splice(i, 1); continue; }
       const alvo = { x: o.x + o.hit.dx, y: o.y + o.hit.dy, w: o.hit.l, h: o.hit.a };
+      if (golpe && !o.tipo.saliencia && !o.tipo.piche && bateu(golpe, alvo)) {
+        est.obstaculos.splice(i, 1);
+        est.bonus += o.tipo.chefe ? 50 : 15;
+        for (let n = 0; n < 14; n++) criarPoeira(o.x + o.l / 2, Math.min(CHAO_Y, o.y + o.a));
+        CenarioVulcanico.impacto(o.x + o.l / 2, Math.min(CHAO_Y - 4, o.y + o.a / 2));
+        Som.impacto();
+        continue;
+      }
       if (bateu(eu, alvo)) { morrer(); return; }
     }
 
@@ -350,7 +394,7 @@ const Jogo = (function () {
       }
     }
 
-    est.pontos = Math.floor(est.distancia / 40) + est.ovos * 20;
+    est.pontos = Math.floor(est.distancia / 40) + est.ovos * 20 + est.bonus;
     if (est.pontos >= est.proxMarco) {
       est.proxMarco += 250;
       Som.marco();
@@ -373,6 +417,7 @@ const Jogo = (function () {
     est.modo = 'fim';
     est.tempoMorte = 0;
     est.deslizando = false;
+    est.atacando = false;
     for (let i = 0; i < 22; i++) criarPoeira(JOGADOR_X + 10, CHAO_Y);
     Som.dano();
     if (eventos.aoMorrer) eventos.aoMorrer(est.pontos, est.ovos);
@@ -403,13 +448,7 @@ const Jogo = (function () {
   /* ---- Desenho ------------------------------------------------------------ */
 
   function desenharFundo() {
-    const f = CENARIO.fundo;
-    const img = Assets.img(f.arquivo);
-    if (!img) return;
-    const off = (est.distancia * 0.14) % f.l;
-    for (let x = -off; x < MUNDO_L; x += f.l) {
-      ctx.drawImage(img, Math.floor(x), 0, f.l, f.a);
-    }
+    CenarioVulcanico.desenharFundo(ctx, est.distancia);
   }
 
   function desenharDecoracao() {
@@ -521,9 +560,12 @@ const Jogo = (function () {
     if (est.modo === 'fim') {
       anim = HEROI.morrer;
       quadro = Math.min(anim.n - 1, Math.floor(est.tempoMorte * anim.fps));
+    } else if (est.atacando) {
+      anim = HEROI.atacar;
+      quadro = Math.min(anim.n - 1, Math.floor((est.tempoAtaque / DURACAO_ATAQUE) * anim.n));
     } else if (est.deslizando && est.noChao) {
       anim = HEROI.deslizar;
-      quadro = 0;
+      quadro = Math.floor(est.animT * anim.fps) % anim.n;
     } else if (!est.noChao) {
       anim = HEROI.pular;
       // O pulo nao fica em loop: mapeia a altura atual para o quadro certo,
@@ -556,7 +598,7 @@ const Jogo = (function () {
 
     ctx.drawImage(
       img,
-      quadro * anim.lq, 0, anim.lq, anim.aq,
+      ((anim.coluna || 0) + quadro) * anim.lq, (anim.linha || 0) * anim.aq, anim.lq, anim.aq,
       JOGADOR_X + anim.dx * EH, est.py + anim.dy * EH,
       anim.lq * EH, anim.aq * EH
     );
@@ -616,6 +658,7 @@ const Jogo = (function () {
     }
 
     desenharHeroi();
+    CenarioVulcanico.desenharFrente(ctx);
 
     // Filtro de cor do horario. Multiply preserva as formas e so muda o tom.
     if (amb.forca > 0.01) {
@@ -637,7 +680,7 @@ const Jogo = (function () {
   return {
     MUNDO_L, MUNDO_A,
     iniciar, modoDemo, novaPartida, atualizar, desenhar,
-    pular, soltarPulo, deslizar,
+    pular, soltarPulo, deslizar, atacar,
     get pontos() { return est.pontos; },
     get ovos() { return est.ovos; },
     get modo() { return est.modo; },
@@ -646,7 +689,7 @@ const Jogo = (function () {
     // o jogo em si nunca le daqui.
     get depuracao() {
       return {
-        py: est.py, noChao: est.noChao, deslizando: est.deslizando,
+        py: est.py, noChao: est.noChao, deslizando: est.deslizando, atacando: est.atacando,
         velocidade: est.velocidade, distancia: est.distancia,
         obstaculos: est.obstaculos, itens: est.itens,
       };

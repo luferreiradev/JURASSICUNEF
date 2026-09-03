@@ -28,8 +28,9 @@ const ler = (p) => fs.readFileSync(path.join(RAIZ, p), 'utf8');
    Os arquivos declaram `const X = ...` no topo, entao envolvemos cada um
    numa funcao e devolvemos o que interessa.                               */
 
-const { CHEFE, CENARIO } = new Function(ler('js/assets-dados.js') + '\n; return { CHEFE, CENARIO };')();
+const { CENARIO } = new Function(ler('js/assets-dados.js') + '\n; return { CENARIO };')();
 const { HEROI } = new Function(ler('js/assets-homem.js') + '\n; return { HEROI };')();
+const { CHEFE } = new Function(ler('js/assets-chefe.js') + '\n; return { CHEFE };')();
 
 const Som = { destravar() {}, pulo() {}, ataque() {}, impacto() {}, coleta() {}, dano() {}, marco() {} };
 const Curiosidades = { sortear: () => ({ titulo: '', texto: '' }) };
@@ -204,6 +205,28 @@ for (let i = 0; i < 36 && Jogo.modo === 'jogo'; i++) Jogo.atualizar(PASSO);
 const ataqueOk = Jogo.modo === 'jogo' && Jogo.depuracao.obstaculos.length === 0;
 console.log(`[ataque] ${ataqueOk ? 'ok   tacape destruiu o obstaculo' : 'FALHA no alcance/janela do tacape'}\n`);
 if (!ataqueOk) falhas++;
+
+// O carnotauro e o unico obstaculo que NAO some com a tacapada: ele cai e o
+// corpo continua rolando com o cenario. O corpo tem que passar por cima do
+// jogador sem matar, nao pode levar outro golpe e precisa sair da lista ao
+// deixar a tela — senao vira armadilha invisivel ou vazamento de memoria.
+Jogo.novaPartida();
+Jogo.depuracao.obstaculos.push({
+  tipo: { id: 'chefe', chefe: true },
+  x: JOGADOR_X + 250, y: 450 - CHEFE.a, l: CHEFE.l, a: CHEFE.a,
+  hit: { dx: 40, dy: CHEFE.a - 84, l: 68, a: 84 },
+});
+Jogo.atacar();
+let abatido = false;
+for (let i = 0; i < 90 && Jogo.modo === 'jogo'; i++) {
+  Jogo.atualizar(PASSO);
+  const chefe = Jogo.depuracao.obstaculos.find((o) => o.tipo.chefe);
+  if (chefe && chefe.abatido) abatido = true;
+}
+const corpo = Jogo.depuracao.obstaculos.find((o) => o.tipo.chefe);
+const chefeOk = abatido && Jogo.modo === 'jogo' && (!corpo || corpo.x + corpo.l > -60);
+console.log(`[chefe]  ${chefeOk ? 'ok   carnotauro caiu e o corpo passou sem matar' : 'FALHA na morte do chefe'}\n`);
+if (!chefeOk) falhas++;
 
 if (falhas === 0) {
   console.log(`TUDO CERTO: o robo sobreviveu ${PARTIDAS * MODOS.length} partidas inteiras,`);

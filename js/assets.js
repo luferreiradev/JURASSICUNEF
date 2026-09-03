@@ -11,11 +11,12 @@ const Assets = (function () {
   let total = 0;
 
   function arquivos() {
-    const lista = [CHEFE.arquivo];
-    // Os metadados tambem trazem numeros soltos (escala, janela do golpe):
-    // so entra na fila quem realmente aponta para um arquivo.
-    for (const nome in HEROI) if (HEROI[nome] && HEROI[nome].arquivo) lista.push(HEROI[nome].arquivo);
-    for (const nome in CENARIO) if (CENARIO[nome] && CENARIO[nome].arquivo) lista.push(CENARIO[nome].arquivo);
+    const lista = [];
+    // Os metadados tambem trazem numeros soltos (escala, janela do golpe,
+    // tamanho do chefe): so entra na fila quem aponta para um arquivo.
+    for (const dados of [HEROI, CHEFE, CENARIO]) {
+      for (const nome in dados) if (dados[nome] && dados[nome].arquivo) lista.push(dados[nome].arquivo);
+    }
     // Varios estados dividem a mesma folha (parado, deslizar e morrer saem da
     // folha do deslize). Evita baixar a mesma imagem uma vez para cada estado.
     return [...new Set(lista)];

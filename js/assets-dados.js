@@ -1,16 +1,7 @@
 /* GERADO POR ferramentas/preparar-assets.js — nao edite a mao.
-   Arte: GameArt2D (CC0 / dominio publico) — free dino sprites + free desert tileset.
-   CHEFE ancora pelo centro da base; o cenario traz largura e altura crus.
-   O jogador (HEROI) vive em js/assets-homem.js. */
-
-const CHEFE = {
-  "arquivo": "chefe-correr.png",
-  "n": 8,
-  "lq": 291,
-  "aq": 300,
-  "fps": 14,
-  "escala": 0.6833333333333333
-};
+   Arte: GameArt2D (CC0 / dominio publico) — free desert tileset.
+   O cenario traz largura e altura crus.
+   O jogador vive em js/assets-homem.js e o chefe em js/assets-chefe.js. */
 
 const CENARIO = {
   "cacto-alto": {

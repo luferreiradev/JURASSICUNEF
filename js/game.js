@@ -37,7 +37,6 @@ const Jogo = (function () {
   const ATAQUE_ATIVO_ATE = HEROI.golpeAte;
 
   const EH = HEROI.escala;     // escala das folhas do cavernico
-  const EB = CHEFE.escala;     // escala da folha do chefe
   const EC = CENARIO.escala;   // escala do tileset do deserto
 
   /* ---- Obstaculos -------------------------------------------------------
@@ -233,18 +232,19 @@ const Jogo = (function () {
       o = { tipo, tiles, x: MUNDO_L + 20, y: CHAO_Y - ALTURA_VAO - a, l, a };
       o.hit = { dx: 8, dy: 6, l: l - 16, a: a - 6 };
     } else if (tipo.chefe) {
-      const l = CHEFE.lq * EB;
-      const a = CHEFE.aq * EB;
+      const l = CHEFE.l;
+      const a = CHEFE.a;
       o = { tipo, x: MUNDO_L + 30, y: CHAO_Y - a, l, a };
-      // So o TRONCO baixo mata: cauda, pescoco e cabeca erguida ficam fora da
-      // colisao de proposito. Com os 205px inteiros valendo, o chefe viraria
-      // parede em vez de obstaculo.
+      // So a FRENTE BAIXA mata: focinho, peito e patas dianteiras. O lombo, a
+      // cauda e a cabeca erguida ficam fora da colisao de proposito — com os
+      // 188px inteiros valendo, o chefe viraria parede em vez de obstaculo.
       //
-      // A largura tambem e curta por um motivo que nao e obvio: o tempo que se
-      // leva atravessando a caixa e largura/velocidade, entao um chefe largo e
-      // MAIS dificil devagar do que rapido. Com 115px de caixa o robo morria
-      // justamente nas primeiras aparicoes, quando o jogo ainda esta lento.
-      o.hit = { dx: l * 0.30, dy: a - 84, l: l * 0.34, a: 84 };
+      // O tamanho da caixa e o mesmo do dino antigo (68x84) e nao acompanha o
+      // desenho por um motivo que nao e obvio: o tempo que se leva atravessando
+      // a caixa e largura/velocidade, entao um chefe largo e MAIS dificil
+      // devagar do que rapido. Com 115px de caixa o robo morria justamente nas
+      // primeiras aparicoes, quando o jogo ainda esta lento.
+      o.hit = { dx: 40, dy: a - 84, l: 68, a: 84 };
     } else if (tipo.piche) {
       // A poca e a unica coisa cuja largura a gente escolhe, entao ela precisa
       // caber num pulo. Saltando 0,30s antes da borda, ainda restam 0,46s de ar,
@@ -316,6 +316,21 @@ const Jogo = (function () {
 
   /* ---- Atualizacao -------------------------------------------------------- */
 
+  // O carnotauro nao pula e nao para: ele vem correndo junto com o cenario.
+  // Quando a frente dele alcanca o heroi, abre a boca — a mordida do pacote,
+  // que por regra nao interrompe o avanco. Passada a mordida, volta a correr.
+  function atualizarChefe(o, dt) {
+    if (o.abatido) { o.tMorte += dt; return; }
+    if (!o.mordeu && o.x - JOGADOR_X <= CHEFE.distanciaMordida) {
+      o.mordeu = true;
+      o.tMordida = 0;
+    }
+    if (o.tMordida !== undefined) {
+      o.tMordida += dt;
+      if (o.tMordida >= CHEFE.atacar.n / CHEFE.atacar.fps) o.tMordida = undefined;
+    }
+  }
+
   function atualizar(dt) {
     est.t += dt;
     CenarioVulcanico.atualizar(dt, est.velocidade);
@@ -385,13 +400,20 @@ const Jogo = (function () {
       const o = est.obstaculos[i];
       o.x -= avanco;
       if (o.x + o.l < -60) { est.obstaculos.splice(i, 1); continue; }
+      if (o.tipo.chefe) atualizarChefe(o, dt);
+      // Chefe abatido: o corpo continua rolando com o cenario ate sair de
+      // quadro, mas nao mata mais nem pode levar outra tacapada.
+      if (o.abatido) continue;
       const alvo = { x: o.x + o.hit.dx, y: o.y + o.hit.dy, w: o.hit.l, h: o.hit.a };
       if (golpe && !o.tipo.saliencia && !o.tipo.piche && bateu(golpe, alvo)) {
-        est.obstaculos.splice(i, 1);
         est.bonus += o.tipo.chefe ? 50 : 15;
         for (let n = 0; n < 14; n++) criarPoeira(o.x + o.l / 2, Math.min(CHAO_Y, o.y + o.a));
         CenarioVulcanico.impacto(o.x + o.l / 2, Math.min(CHAO_Y - 4, o.y + o.a / 2));
         Som.impacto();
+        // O carnotauro tem folha de morte: em vez de sumir no ar, ele leva o
+        // golpe, cai e fica caido no chao — o ultimo quadro segura.
+        if (o.tipo.chefe) { o.abatido = true; o.tMorte = 0; }
+        else est.obstaculos.splice(i, 1);
         continue;
       }
       if (bateu(eu, alvo)) { morrer(); return; }
@@ -553,21 +575,40 @@ const Jogo = (function () {
     ctx.restore();
   }
 
-  // O chefe ja vem espelhado no arquivo, olhando para a esquerda: ele corre
-  // contra o jogador. A sombra e maior e mais forte que a do heroi, para o
-  // peso dele aparecer.
+  // O carnotauro ja vem olhando para a esquerda no arquivo: ele corre contra o
+  // jogador, entao o desenho e um drawImage direto, sem espelhar. A arte tambem
+  // traz a propria sombra de contato, e por isso aqui nao vai elipse embaixo
+  // dele como vai embaixo do heroi.
   function desenharChefe(o) {
-    const img = Assets.img(CHEFE.arquivo);
+    let anim, quadro;
+    if (o.abatido) {
+      anim = CHEFE.morrer;
+      quadro = Math.min(anim.n - 1, Math.floor(o.tMorte * anim.fps));  // segura o ultimo
+    } else if (o.tMordida !== undefined) {
+      anim = CHEFE.atacar;
+      quadro = Math.min(anim.n - 1, Math.floor(o.tMordida * anim.fps));
+    } else {
+      anim = CHEFE.correr;
+      quadro = Math.floor(est.t * anim.fps) % anim.n;
+    }
+    const img = Assets.img(anim.arquivo);
     if (!img) return;
-    const quadro = Math.floor(est.t * CHEFE.fps) % CHEFE.n;
+
+    // Ancora: o centro do bicho na horizontal, a linha do pe no chao. Cada
+    // folha tem escala propria — a da morte veio maior — entao o desenho parte
+    // da ancora, e nao da caixa do obstaculo.
+    const e = anim.escala;
     ctx.save();
-    ctx.globalAlpha = 0.42;
-    ctx.fillStyle = '#100a10';
-    ctx.beginPath();
-    ctx.ellipse(o.x + o.l / 2, CHAO_Y + 6, o.l * 0.34, 10, 0, 0, Math.PI * 2);
-    ctx.fill();
+    // Sem suavizacao: as folhas nao tem um pixel semitransparente sequer, e o
+    // filtro do navegador inventaria uma franja clara em volta do bicho.
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(
+      img,
+      quadro * CHEFE.lq, 0, CHEFE.lq, CHEFE.aq,
+      Math.round(o.x + o.l / 2 - CHEFE.lq * e / 2), Math.round(CHAO_Y - CHEFE.pe * e),
+      Math.round(CHEFE.lq * e), Math.round(CHEFE.aq * e)
+    );
     ctx.restore();
-    ctx.drawImage(img, quadro * CHEFE.lq, 0, CHEFE.lq, CHEFE.aq, o.x, o.y, o.l, o.a);
   }
 
   function desenharHeroi() {

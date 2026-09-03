@@ -6,7 +6,7 @@ a cada ovo de dinossauro coletado, aparece uma curiosidade real sobre a pré-his
 
 Você é um **homem das cavernas** correndo com um tacape por
 uma paisagem vulcânica, desviando de pedras, cactos, poças de piche e de um
-**dinossauro predador** que vem de frente.
+**carnotauro** que vem correndo de frente.
 
 **Jogar:** https://luferreiradev.github.io/JURASSICUNEF/?v=2
 
@@ -25,8 +25,9 @@ O QR Code pronto para o cartaz está em [`qrcode.png`](qrcode.png) (1024×1024).
 
 Pegue os **ovos** para somar pontos e desbloquear curiosidades. A velocidade
 aumenta com a distância e o cenário passa por um ciclo de dia e noite.
-O tacape quebra obstáculos sólidos (inclusive o predador), mas não elimina a
-poça de piche nem a saliência: esses continuam exigindo pulo e deslize.
+O tacape quebra obstáculos sólidos e derruba o carnotauro — que cai e fica
+caído no chão até sair de quadro —, mas não elimina a poça de piche nem a
+saliência: esses continuam exigindo pulo e deslize.
 
 Os obstáculos vão sendo apresentados aos poucos conforme você avança: pedra e
 cacto desde o começo, saliência de rocha (que exige deslizar) a partir dos
@@ -64,8 +65,9 @@ index.html              página do jogo
 qr.html                 gerador do QR Code (uso interno, não faz parte do jogo)
 qrcode.png              o QR Code já gerado, pronto para o cartaz
 css/style.css           interface: menu, placar, curiosidades
-js/assets-dados.js      GERADO — o chefe e o cenário
+js/assets-dados.js      GERADO — o cenário
 js/assets-homem.js      GERADO — metadados das folhas do homem das cavernas
+js/assets-chefe.js      metadados das folhas do carnotauro
 js/assets.js            carregamento das imagens
 js/curiosidades.js      os fatos sobre a Era Primitiva
 js/audio.js             efeitos sonoros gerados por Web Audio (sem arquivos)
@@ -74,7 +76,8 @@ js/game.js              motor: física, obstáculos, colisão, cenário
 js/main.js              telas, controles e laço principal
 assets/                 GERADO — sprites e tiles já recortados
 ferramentas/            scripts de apoio (não vão para o navegador)
-  preparar-assets.js      recorta o cenário, repinta no estilo vulcânico e monta o chefe
+  preparar-assets.js      recorta o cenário e repinta no estilo vulcânico
+  pacote-carnotauro-boss/ o pacote do chefe como veio do autor
   importar-preset-html.js tira as folhas do personagem de dentro do preset HTML
   gerar-qrcode.js          regenera o QR Code público em 1024×1024
   teste-jogabilidade.js   robô que joga sozinho para provar que dá para passar
@@ -106,19 +109,42 @@ Ele já pegou duas coisas que passariam batido:
 
 ### O que veio pronto
 
-Dois pacotes gratuitos do [GameArt2D](https://www.gameart2d.com/freebies.html), em
-**licença CC0 (domínio público)** — uso livre, inclusive comercial, sem crédito obrigatório:
-
-- [Free Desert Platformer Tileset](https://www.gameart2d.com/free-desert-platformer-tileset.html) — cenário, chão e obstáculos
-- [Free Dino Sprites](https://www.gameart2d.com/free-dino-sprites.html) — vira o **chefe**
+O [Free Desert Platformer Tileset](https://www.gameart2d.com/free-desert-platformer-tileset.html)
+do [GameArt2D](https://www.gameart2d.com/freebies.html), em **licença CC0
+(domínio público)** — uso livre, inclusive comercial, sem crédito obrigatório —
+dá o cenário, o chão e os obstáculos.
 
 O cenário não é usado como veio: `preparar-assets.js` **repinta cada pixel pela
 luminosidade**, seguindo uma rampa de cores, o que troca a atmosfera inteira para
 vulcânica sem redesenhar nada. Obstáculos levam uma rampa mais clara que o chão —
 sem isso viram vultos escuros sobre chão escuro e não dá tempo de reagir.
 
-O chefe é o mesmo dino espelhado e repintado como predador: corpo vermelho-escuro
-e olho âmbar. O olho é o que mais muda a leitura — azul claro é simpático.
+### O chefe: carnotauro
+
+Vem do pacote `pacote-carnotauro-boss` v1.0.0, guardado inteiro em
+[`ferramentas/pacote-carnotauro-boss/`](ferramentas/pacote-carnotauro-boss)
+(folhas originais, referência de design, o script de preparo do autor e o
+controlador `carnotauro-boss.js`). As folhas que o jogo carrega são cópias
+byte a byte em `assets/`; nenhum pixel foi redesenhado.
+
+São três folhas de 8 quadros, célula de 192×128, o bicho já olhando para a
+esquerda: **corrida** (10 fps), **mordida** (12) e **morte** (9). O jogo usa as
+três — ele corre, abre a boca quando alcança o herói e, ao levar a tacapada,
+cai e fica caído no chão até sair de quadro.
+
+Duas coisas foram medidas na arte em vez de chutadas:
+
+- **linha do pé = 121.** Sobram 7px vazios embaixo da célula; é o pé, não a
+  borda, que precisa pousar em `CHAO_Y`.
+- **escala por folha.** Corrida e mordida foram desenhadas no mesmo tamanho, mas
+  a folha de morte veio ~1,55× maior. Sem escala própria o carnotauro
+  *cresceria* no instante da tacapada.
+
+O controlador que veio no pacote foi escrito para um jogo de arena: ele move o
+boss por conta própria, desenha barra de vida e dá 3 pontos de vida ao bicho.
+Aqui o chefe é um dos obstáculos do runner — quem move o mundo é o cenário, e o
+tacape derruba de primeira, como derrubava o dino antigo. As **regras do jogo
+ficaram como estavam**; o que foi substituído é o dinossauro.
 
 ### O que foi desenhado aqui
 
@@ -148,12 +174,12 @@ O ovo colecionável e a poça de piche também são desenhados no canvas, em `js
 
 ### Tamanho
 
-Os PNGs originais somam ~10 MB; a pasta `assets/` fica em **~420 KB** — o que
+Os PNGs originais somam ~10 MB; a pasta `assets/` fica em **~510 KB** — o que
 importa para quem escaneia o QR Code no 4G. Para regerar:
 
 ```bash
 npm i sharp
-node ferramentas/preparar-assets.js <pasta>/dino/png <pasta>/desert/png
+node ferramentas/preparar-assets.js <pasta>/desert/png
 node ferramentas/importar-preset-html.js caminho/para/homem-das-cavernas-v2.html
 ```
 

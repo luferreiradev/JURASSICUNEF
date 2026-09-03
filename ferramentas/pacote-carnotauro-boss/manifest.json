@@ -1,0 +1,17 @@
+{
+  "name": "boss-carnotauro",
+  "version": "1.0.0",
+  "direction": "left",
+  "type": "ground-boss",
+  "health": 3,
+  "spriteSheet": {
+    "frameWidth": 192,
+    "frameHeight": 128,
+    "frames": 8
+  },
+  "animations": {
+    "run": { "file": "assets/boss-carnotauro-run.png", "fps": 10, "loop": true },
+    "attack": { "file": "assets/boss-carnotauro-attack.png", "fps": 12, "loop": false },
+    "death": { "file": "assets/boss-carnotauro-death.png", "fps": 9, "loop": false, "holdLastFrame": true }
+  }
+}

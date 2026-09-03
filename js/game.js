@@ -29,9 +29,11 @@ const Jogo = (function () {
   const CADENCIA_MIN = 9;      // quadros por segundo em VEL_INI
   const CADENCIA_MAX = 17;     // quadros por segundo em VEL_MAX
 
-  const DURACAO_ATAQUE = 0.88;
-  const ATAQUE_ATIVO_DE = 0.34;
-  const ATAQUE_ATIVO_ATE = 0.62;
+  // O ataque dura exatamente o que a folha do preset dura (8 quadros a 12 fps)
+  // e so machuca na janela em que o rastro do tacape aparece nela.
+  const DURACAO_ATAQUE = HEROI.atacar.n / HEROI.atacar.fps;
+  const ATAQUE_ATIVO_DE = HEROI.golpeDe;
+  const ATAQUE_ATIVO_ATE = HEROI.golpeAte;
 
   const EH = HEROI.escala;     // escala das folhas do cavernico
   const EB = CHEFE.escala;     // escala da folha do chefe
@@ -53,9 +55,10 @@ const Jogo = (function () {
     { id: 'chefe',       chefe: true,         distMin: 3000, peso: 1 },  // o predador
   ];
 
-  // 92 e a folga que deixa o cavernico DEITADO (84px de desenho) passar sem
-  // entrar na pedra. Com 66 ele atravessava a rocha visualmente, mesmo com a
-  // colisao correta — e o jogador so ve o desenho.
+  // 92 e a folga que deixa o cavernico DEITADO passar sem entrar na pedra. Com
+  // 66 ele atravessava a rocha visualmente, mesmo com a colisao correta — e o
+  // jogador so ve o desenho. O quadro deitado do preset novo tem 44px na folha,
+  // 61px no jogo, entao passa com folga.
   const ALTURA_VAO = 92;
   // Nomes repetidos servem de peso: 'capim' aparece 3x mais que 'arvore'.
   const DECOR = [
@@ -95,6 +98,8 @@ const Jogo = (function () {
     vy: 0,
     noChao: true,
     deslizando: false,
+    tempoDeslize: 0,           // conta desde que o deslize comecou
+    levantando: 0,             // sobra de tempo para o quadro de levantar
     segurandoPulo: false,
     atacando: false,
     tempoAtaque: 0,
@@ -156,6 +161,8 @@ const Jogo = (function () {
     est.vy = 0;
     est.noChao = true;
     est.deslizando = false;
+    est.tempoDeslize = 0;
+    est.levantando = 0;
     est.segurandoPulo = false;
     est.atacando = false;
     est.tempoAtaque = 0;
@@ -196,6 +203,11 @@ const Jogo = (function () {
     // disparou um pulo. Um mergulho forte devolve o dino ao chao em menos de
     // 0,1s, a tempo de ele ainda passar deitado embaixo da saliencia.
     if (ativo && !est.noChao) est.vy = Math.max(est.vy + 900, 1400);
+    // O deslize do preset e um movimento inteiro: abaixa, segura e levanta.
+    // Como no jogo ele fica preso enquanto o dedo estiver na tela, o comeco e o
+    // fim viram tempos proprios — o meio e o unico quadro que se repete.
+    if (ativo && !est.deslizando) est.tempoDeslize = 0;
+    if (!ativo && est.deslizando) est.levantando = 1 / HEROI.deslizar.fps;
     est.deslizando = ativo;
   }
 
@@ -326,6 +338,8 @@ const Jogo = (function () {
     const avanco = est.velocidade * dt;
     est.distancia += avanco;
     est.animT += dt;
+    if (est.deslizando) est.tempoDeslize += dt;
+    if (est.levantando > 0) est.levantando -= dt;
 
     if (est.atacando) {
       est.tempoAtaque += dt;
@@ -564,17 +578,18 @@ const Jogo = (function () {
       anim = HEROI.atacar;
       quadro = Math.min(anim.n - 1, Math.floor((est.tempoAtaque / DURACAO_ATAQUE) * anim.n));
     } else if (est.deslizando && est.noChao) {
+      // Nada de rodar a folha em loop aqui: os dois ultimos quadros dela sao o
+      // barbaro se levantando e ja de pe, e segurar o dedo faria ele atravessar
+      // a saliencia por cima. O quadro 0 abaixa, o 1 segura deitado.
       anim = HEROI.deslizar;
-      quadro = Math.floor(est.animT * anim.fps) % anim.n;
+      quadro = est.tempoDeslize * anim.fps < 1 ? 0 : 1;
+    } else if (est.levantando > 0 && est.noChao) {
+      anim = HEROI.deslizar;
+      quadro = 2;                       // o piscar em que ele se recompoe
     } else if (!est.noChao) {
+      // Dois quadros da corrida: encolhido na subida, esticado para pisar.
       anim = HEROI.pular;
-      // O pulo nao fica em loop: mapeia a altura atual para o quadro certo,
-      // entao a pose acompanha a subida e a descida.
-      const prog = Math.min(1, Math.max(0, (CHAO_Y - est.py) / 140));
-      const subindo = est.vy < 0;
-      quadro = subindo
-        ? Math.min(anim.n - 1, Math.round(prog * (anim.n - 1)))
-        : Math.min(anim.n - 1, Math.round((anim.n - 1) * (0.55 + (1 - prog) * 0.45)));
+      quadro = est.vy < 0 ? 0 : 1;
     } else {
       anim = HEROI.correr;
       const k = (est.velocidade - VEL_INI) / (VEL_MAX - VEL_INI);
@@ -596,9 +611,12 @@ const Jogo = (function () {
     ctx.fill();
     ctx.restore();
 
+    // Estados que reaproveitam quadros soltos de outra folha (parado, pulo,
+    // morte) trazem a lista pronta; os demais sao colunas seguidas.
+    const coluna = anim.quadros ? anim.quadros[quadro] : (anim.coluna || 0) + quadro;
     ctx.drawImage(
       img,
-      ((anim.coluna || 0) + quadro) * anim.lq, (anim.linha || 0) * anim.aq, anim.lq, anim.aq,
+      coluna * anim.lq, (anim.linha || 0) * anim.aq, anim.lq, anim.aq,
       JOGADOR_X + anim.dx * EH, est.py + anim.dy * EH,
       anim.lq * EH, anim.aq * EH
     );

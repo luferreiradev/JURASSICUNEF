@@ -1,202 +1,165 @@
 {
   "name": "homem_das_cavernas",
-  "version": 3,
-  "source": "sprite 64x64 fornecido pelo usuario",
-  "sheet": {
-    "file": "homem-das-cavernas.png",
-    "cell": [
-      152,
-      152
-    ],
-    "scale": 2,
-    "columns": 12,
-    "rows": 5
-  },
-  "origin": [
-    76,
-    140
-  ],
-  "hitbox": {
-    "x": -32,
-    "y": -124,
-    "w": 66,
-    "h": 124
-  },
-  "attackHitbox": {
-    "activeFrom": 0.34,
-    "activeTo": 0.62,
-    "size": 40,
-    "note": "segue a ponta do bastao"
+  "source": "homem-das-cavernas-v2.html",
+  "build": "20260902-barbaro-bastao-360-v16-attack-edge-match",
+  "scale": 1.39,
+  "heroHeightPx": 124,
+  "sheets": {
+    "correr": {
+      "file": "homem-correr.png",
+      "cell": [
+        96,
+        96
+      ],
+      "frames": 8,
+      "fps": 12,
+      "footLine": 93,
+      "contentBox": {
+        "x0": 3,
+        "x1": 91,
+        "y0": 4,
+        "y1": 92
+      },
+      "frameHeights": [
+        89,
+        84,
+        89,
+        83,
+        89,
+        80,
+        89,
+        89
+      ]
+    },
+    "deslizar": {
+      "file": "homem-deslizar.png",
+      "cell": [
+        128,
+        96
+      ],
+      "frames": 4,
+      "fps": 9,
+      "footLine": 93,
+      "contentBox": {
+        "x0": 3,
+        "x1": 124,
+        "y0": 9,
+        "y1": 92
+      },
+      "frameHeights": [
+        64,
+        44,
+        64,
+        84
+      ]
+    },
+    "atacar": {
+      "file": "homem-atacar.png",
+      "cell": [
+        160,
+        128
+      ],
+      "frames": 8,
+      "fps": 12,
+      "footLine": 124,
+      "contentBox": {
+        "x0": 11,
+        "x1": 147,
+        "y0": 3,
+        "y1": 123
+      },
+      "frameHeights": [
+        91,
+        90,
+        91,
+        120,
+        120,
+        91,
+        90,
+        91
+      ]
+    }
   },
   "animations": {
-    "idle": {
-      "row": 0,
-      "frames": 6,
-      "fps": 8,
-      "loop": true,
-      "nextOnEnd": null
+    "parado": {
+      "sheet": "deslizar",
+      "file": "homem-deslizar.png",
+      "frames": 1,
+      "fps": 1,
+      "pick": [
+        3
+      ],
+      "dx": -64,
+      "dy": -93,
+      "note": "ultimo quadro do deslize: o barbaro de pe, como no preset"
     },
-    "run": {
-      "row": 1,
+    "correr": {
+      "sheet": "correr",
+      "file": "homem-correr.png",
       "frames": 8,
-      "fps": 14,
-      "loop": true,
-      "nextOnEnd": null
+      "fps": 12,
+      "pick": null,
+      "dx": -48,
+      "dy": -93,
+      "note": "passada completa; o jogo ainda acelera a cadencia com a velocidade"
     },
-    "slide": {
-      "row": 2,
+    "deslizar": {
+      "sheet": "deslizar",
+      "file": "homem-deslizar.png",
       "frames": 4,
-      "fps": 10,
-      "loop": true,
-      "nextOnEnd": null
+      "fps": 9,
+      "pick": null,
+      "dx": -64,
+      "dy": -93,
+      "note": "quadro 0 desce, 1 segura deitado, 2 levanta, 3 ja esta de pe"
     },
-    "attack": {
-      "row": 3,
-      "frames": 12,
-      "fps": 18,
-      "loop": false,
-      "nextOnEnd": "idle"
+    "atacar": {
+      "sheet": "atacar",
+      "file": "homem-atacar.png",
+      "frames": 8,
+      "fps": 12,
+      "pick": null,
+      "dx": -80,
+      "dy": -124,
+      "note": "giro de 360 graus com o tacape"
     },
-    "jump": {
-      "row": 4,
-      "frames": 5,
-      "fps": 10,
-      "loop": false,
-      "nextOnEnd": "idle"
+    "pular": {
+      "sheet": "correr",
+      "file": "homem-correr.png",
+      "frames": 2,
+      "fps": 6,
+      "pick": [
+        3,
+        7
+      ],
+      "dx": -48,
+      "dy": -93,
+      "note": "os dois quadros da corrida em que ele esta no ar"
+    },
+    "morrer": {
+      "sheet": "deslizar",
+      "file": "homem-deslizar.png",
+      "frames": 1,
+      "fps": 1,
+      "pick": [
+        1
+      ],
+      "dx": -64,
+      "dy": -93,
+      "note": "o corpo esticado no chao"
     }
+  },
+  "attackHitbox": {
+    "activeFrom": 0.375,
+    "activeTo": 0.75,
+    "note": "quadros em que o rastro do tacape aparece na folha"
   },
   "world": {
     "nativeWidth": 384,
     "nativeHeight": 216,
     "groundY": 176,
-    "runSpeedPxPerSec": 80,
-    "slideSpeedPxPerSec": 102,
-    "jumpHeightPx": 40
-  },
-  "rig": {
-    "pivots": {
-      "body": [
-        0,
-        0
-      ],
-      "armL_u": [
-        9,
-        2
-      ],
-      "armL_f": [
-        6,
-        0
-      ],
-      "armR_u": [
-        5,
-        2
-      ],
-      "armR_f": [
-        8,
-        0
-      ],
-      "legL_t": [
-        6,
-        7
-      ],
-      "legL_s": [
-        6,
-        0
-      ],
-      "legR_t": [
-        6,
-        7
-      ],
-      "legR_s": [
-        4,
-        0
-      ],
-      "club": [
-        6,
-        7
-      ]
-    },
-    "anchors": {
-      "body": [
-        0,
-        0
-      ],
-      "armL_u": [
-        -10,
-        -46
-      ],
-      "armL_f": [
-        -13,
-        -32
-      ],
-      "armR_u": [
-        10,
-        -46
-      ],
-      "armR_f": [
-        13,
-        -32
-      ],
-      "legL_t": [
-        -5,
-        -16
-      ],
-      "legL_s": [
-        -5,
-        -8
-      ],
-      "legR_t": [
-        8,
-        -16
-      ],
-      "legR_s": [
-        8,
-        -9
-      ],
-      "club": [
-        0,
-        0
-      ]
-    },
-    "restAngles": {
-      "armL_u": -0.21109333322274654,
-      "armL_f": 0,
-      "armR_u": 0.21109333322274654,
-      "armR_f": 0,
-      "legL_t": 0,
-      "legL_s": 0,
-      "legR_t": 0,
-      "legR_s": 0
-    },
-    "handRight": [
-      15,
-      -22
-    ],
-    "clubBack": {
-      "pos": [
-        -1,
-        -30
-      ],
-      "ang": -2.35
-    }
-  },
-  "palette": [
-    "#312420",
-    "#402924",
-    "#221916",
-    "#472c27",
-    "#744c3a",
-    "#51312a",
-    "#482b26",
-    "#f8d1b0",
-    "#e79684",
-    "#0d0805",
-    "#804e3d",
-    "#714838",
-    "#f8c19e",
-    "#0e0705",
-    "#c4796a",
-    "#a96559",
-    "#0e0b07"
-  ]
+    "gameWidth": 960,
+    "gameHeight": 540,
+    "gameGroundY": 450
+  }
 }

@@ -65,7 +65,7 @@ qr.html                 gerador do QR Code (uso interno, não faz parte do jogo)
 qrcode.png              o QR Code já gerado, pronto para o cartaz
 css/style.css           interface: menu, placar, curiosidades
 js/assets-dados.js      GERADO — o chefe e o cenário
-js/assets-homem.js      metadados da folha de sprites do homem das cavernas
+js/assets-homem.js      GERADO — metadados das folhas do homem das cavernas
 js/assets.js            carregamento das imagens
 js/curiosidades.js      os fatos sobre a Era Primitiva
 js/audio.js             efeitos sonoros gerados por Web Audio (sem arquivos)
@@ -75,7 +75,7 @@ js/main.js              telas, controles e laço principal
 assets/                 GERADO — sprites e tiles já recortados
 ferramentas/            scripts de apoio (não vão para o navegador)
   preparar-assets.js      recorta o cenário, repinta no estilo vulcânico e monta o chefe
-  importar-preset-html.js exporta sprites/metadados do preset HTML fornecido
+  importar-preset-html.js tira as folhas do personagem de dentro do preset HTML
   gerar-qrcode.js          regenera o QR Code público em 1024×1024
   teste-jogabilidade.js   robô que joga sozinho para provar que dá para passar
 ```
@@ -122,15 +122,33 @@ e olho âmbar. O olho é o que mais muda a leitura — azul claro é simpático.
 
 ### O que foi desenhado aqui
 
-O personagem vem do preset `homem-das-cavernas-v2.html`: um sprite pixel-art
-articulado, exportado em uma folha única com as animações de parado, corrida,
-deslize, ataque e pulo. A folha e seus metadados ficam em `assets/`.
+O personagem vem do preset `homem-das-cavernas-v2.html` (build
+`barbaro-bastao-360`): um bárbaro pixel-art de capa e tacape, entregue em três
+folhas prontas — `homem-correr.png` (8 quadros), `homem-deslizar.png` (4) e
+`homem-atacar.png` (8, o giro de 360°). Elas ficam em `assets/`, junto com
+`homem-das-cavernas.json`, que guarda o que foi medido em cada uma.
+
+O preset não desenha parado, pulo nem morte, então esses três reaproveitam
+quadros — como o próprio preset faz ao usar o último quadro do deslize para o
+bárbaro em pé:
+
+| estado | de onde sai |
+|---|---|
+| parado | último quadro do deslize (ele já está de pé nele) |
+| pular | os dois quadros da corrida em que os pés estão no ar |
+| morrer | o quadro deitado do deslize, o corpo esticado no chão |
+
+Duas coisas o importador mede em vez de chutar: a **linha do pé** de cada folha
+(o artista deixa alguns pixels vazios embaixo da célula, e é o pé — não a borda —
+que precisa encostar no chão) e a **escala**, que sai da altura de 124 px em que
+a física e as caixas de colisão foram calibradas. Assim um preset novo troca o
+desenho sem rebalancear o jogo por acidente.
 
 O ovo colecionável e a poça de piche também são desenhados no canvas, em `js/game.js`.
 
 ### Tamanho
 
-Os PNGs originais somam ~10 MB; a pasta `assets/` fica em **~380 KB** — o que
+Os PNGs originais somam ~10 MB; a pasta `assets/` fica em **~420 KB** — o que
 importa para quem escaneia o QR Code no 4G. Para regerar:
 
 ```bash
@@ -138,6 +156,9 @@ npm i sharp
 node ferramentas/preparar-assets.js <pasta>/dino/png <pasta>/desert/png
 node ferramentas/importar-preset-html.js caminho/para/homem-das-cavernas-v2.html
 ```
+
+O `sharp` é só para o cenário e o chefe. O importador do personagem não precisa
+de nada instalado, nem de navegador: as folhas vêm embutidas no próprio preset.
 
 ## Créditos
 

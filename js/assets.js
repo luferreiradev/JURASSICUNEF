@@ -12,10 +12,12 @@ const Assets = (function () {
 
   function arquivos() {
     const lista = [CHEFE.arquivo];
-    for (const nome in HEROI) if (nome !== 'escala') lista.push(HEROI[nome].arquivo);
-    for (const nome in CENARIO) if (nome !== 'escala') lista.push(CENARIO[nome].arquivo);
-    // O preset v2 guarda todas as animacoes na mesma folha. Evita baixar a
-    // mesma imagem uma vez para cada estado.
+    // Os metadados tambem trazem numeros soltos (escala, janela do golpe):
+    // so entra na fila quem realmente aponta para um arquivo.
+    for (const nome in HEROI) if (HEROI[nome] && HEROI[nome].arquivo) lista.push(HEROI[nome].arquivo);
+    for (const nome in CENARIO) if (CENARIO[nome] && CENARIO[nome].arquivo) lista.push(CENARIO[nome].arquivo);
+    // Varios estados dividem a mesma folha (parado, deslizar e morrer saem da
+    // folha do deslize). Evita baixar a mesma imagem uma vez para cada estado.
     return [...new Set(lista)];
   }
 

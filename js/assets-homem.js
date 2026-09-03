@@ -6,7 +6,7 @@
      parado   ultimo quadro do deslize: o barbaro de pe, como no preset
      correr   passada completa; o jogo ainda acelera a cadencia com a velocidade
      deslizar quadro 0 desce, 1 segura deitado, 2 levanta, 3 ja esta de pe
-     atacar   giro de 360 graus com o tacape
+     atacar   giro de 360 graus com o tacape, mais rapido que no preset
      pular    os dois quadros da corrida em que ele esta no ar
      morrer   o corpo esticado no chao
 
@@ -20,11 +20,11 @@ const HEROI = {
   parado:   { arquivo: 'homem-deslizar.png', quadros: [3], n: 1, lq: 128, aq: 96, fps: 1, dx: -64, dy: -93 },
   correr:   { arquivo: 'homem-correr.png', coluna: 0, n: 8, lq: 96, aq: 96, fps: 12, dx: -48, dy: -93 },
   deslizar: { arquivo: 'homem-deslizar.png', coluna: 0, n: 4, lq: 128, aq: 96, fps: 9, dx: -64, dy: -93 },
-  atacar:   { arquivo: 'homem-atacar.png', coluna: 0, n: 8, lq: 160, aq: 128, fps: 12, dx: -80, dy: -124 },
+  atacar:   { arquivo: 'homem-atacar.png', coluna: 0, n: 8, lq: 160, aq: 128, fps: 16, dx: -80, dy: -124 },
   pular:    { arquivo: 'homem-correr.png', quadros: [3, 7], n: 2, lq: 96, aq: 96, fps: 6, dx: -48, dy: -93 },
   morrer:   { arquivo: 'homem-deslizar.png', quadros: [1], n: 1, lq: 128, aq: 96, fps: 1, dx: -64, dy: -93 },
-  // Janela em que o tacape varre a frente do corpo: quadros 3 a 6 do ataque.
-  golpeDe: 0.375,
-  golpeAte: 0.750,
+  // Janela em que o tacape varre a frente do corpo: quadros 2 a 7 do ataque.
+  golpeDe: 0.250,
+  golpeAte: 0.875,
   escala: 1.39,
 };

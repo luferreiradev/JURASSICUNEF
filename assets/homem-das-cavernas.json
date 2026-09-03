@@ -117,11 +117,11 @@
       "sheet": "atacar",
       "file": "homem-atacar.png",
       "frames": 8,
-      "fps": 12,
+      "fps": 16,
       "pick": null,
       "dx": -80,
       "dy": -124,
-      "note": "giro de 360 graus com o tacape"
+      "note": "giro de 360 graus com o tacape, mais rapido que no preset"
     },
     "pular": {
       "sheet": "correr",
@@ -150,8 +150,8 @@
     }
   },
   "attackHitbox": {
-    "activeFrom": 0.375,
-    "activeTo": 0.75,
+    "activeFrom": 0.25,
+    "activeTo": 0.875,
     "note": "quadros em que o rastro do tacape aparece na folha"
   },
   "world": {

@@ -30,8 +30,10 @@ const Jogo = (function () {
   const CADENCIA_MIN = 8;                 // quadros por segundo em VEL_INI
   const CADENCIA_MAX = HEROI.correr.fps;  // 12: a cadencia do preset, em VEL_MAX
 
-  // O ataque dura exatamente o que a folha do preset dura (8 quadros a 12 fps)
-  // e so machuca na janela em que o rastro do tacape aparece nela.
+  // O ataque dura o que a folha dura (8 quadros a 16 por segundo, meio segundo)
+  // e machuca na janela em que o tacape esta varrendo a frente do corpo. Os
+  // dois numeros vem de js/assets-homem.js para nao sairem de sincronia com o
+  // desenho: o golpe tem que cair quando o jogador VE o bastao passar.
   const DURACAO_ATAQUE = HEROI.atacar.n / HEROI.atacar.fps;
   const ATAQUE_ATIVO_DE = HEROI.golpeDe;
   const ATAQUE_ATIVO_ATE = HEROI.golpeAte;
@@ -104,7 +106,8 @@ const Jogo = (function () {
     atacando: false,
     tempoAtaque: 0,
     coyote: 0,
-    animT: 0,
+    // Fase da corrida contada em QUADROS, nao em segundos. Ver atualizar().
+    quadroCorrida: 0,
     tempoMorte: 0,
 
     obstaculos: [],
@@ -167,6 +170,7 @@ const Jogo = (function () {
     est.atacando = false;
     est.tempoAtaque = 0;
     est.coyote = 0;
+    est.quadroCorrida = 0;
     est.tempoMorte = 0;
     est.obstaculos.length = 0;
     est.itens.length = 0;
@@ -342,9 +346,10 @@ const Jogo = (function () {
     }
 
     if (est.modo === 'demo') {
-      // Cenario correndo atras do menu, sem obstaculos.
+      // Cenario correndo atras do menu, sem obstaculos. Anda a 60% da
+      // velocidade inicial, e a passada acompanha na mesma proporcao.
       est.distancia += VEL_INI * 0.6 * dt;
-      est.animT += dt;
+      est.quadroCorrida += CADENCIA_MIN * 0.6 * dt;
       atualizarPoeira(dt);
       return;
     }
@@ -353,7 +358,19 @@ const Jogo = (function () {
     est.velocidade = Math.min(VEL_MAX, est.velocidade + ACEL * dt);
     const avanco = est.velocidade * dt;
     est.distancia += avanco;
-    est.animT += dt;
+
+    // A passada avanca em QUADROS POR SEGUNDO, e nao em segundos.
+    //
+    // Parece a mesma coisa, e nao e: a cadencia sobe junto com a velocidade.
+    // Guardando o tempo e multiplicando pela cadencia do momento (o que o jogo
+    // fazia antes), a taxa real vira cadencia + tempoAcumulado x d(cadencia)/dt
+    // — ou seja, a animacao ACELERA sozinha quanto mais tempo passa. Com 2
+    // minutos de jogo as pernas ja batiam a 35 quadros/s em vez de 12, e nem
+    // morrer resolvia, porque o acumulador nunca zerava entre partidas (a
+    // vitrine do menu tambem somava). Acumulando a fase ja em quadros, a taxa e
+    // exatamente a cadencia, sempre.
+    const k = (est.velocidade - VEL_INI) / (VEL_MAX - VEL_INI);
+    est.quadroCorrida += (CADENCIA_MIN + (CADENCIA_MAX - CADENCIA_MIN) * k) * dt;
     if (est.deslizando) est.tempoDeslize += dt;
     if (est.levantando > 0) est.levantando -= dt;
 
@@ -633,10 +650,9 @@ const Jogo = (function () {
       anim = HEROI.pular;
       quadro = est.vy < 0 ? 0 : 1;
     } else {
+      // A cadencia ja foi aplicada em atualizar(): aqui e so ler a fase.
       anim = HEROI.correr;
-      const k = (est.velocidade - VEL_INI) / (VEL_MAX - VEL_INI);
-      const fps = CADENCIA_MIN + (CADENCIA_MAX - CADENCIA_MIN) * k;
-      quadro = Math.floor(est.animT * fps) % anim.n;
+      quadro = Math.floor(est.quadroCorrida) % anim.n;
     }
 
     const img = Assets.img(anim.arquivo);
@@ -751,6 +767,7 @@ const Jogo = (function () {
       return {
         py: est.py, noChao: est.noChao, deslizando: est.deslizando, atacando: est.atacando,
         velocidade: est.velocidade, distancia: est.distancia,
+        quadroCorrida: est.quadroCorrida,
         obstaculos: est.obstaculos, itens: est.itens,
       };
     },

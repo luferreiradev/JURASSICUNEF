@@ -206,6 +206,28 @@ const ataqueOk = Jogo.modo === 'jogo' && Jogo.depuracao.obstaculos.length === 0;
 console.log(`[ataque] ${ataqueOk ? 'ok   tacape destruiu o obstaculo' : 'FALHA no alcance/janela do tacape'}\n`);
 if (!ataqueOk) falhas++;
 
+// A passada nao pode acelerar sozinha. A cadencia sai da velocidade e de mais
+// nada — mas a fase era guardada em SEGUNDOS e multiplicada pela cadencia do
+// momento, entao a taxa real crescia junto com o tempo de jogo (e nem morrer
+// zerava, porque o acumulador atravessava as partidas). Um segundo de corrida
+// tem que valer o mesmo numero de quadros na largada e depois de 3 minutos.
+function quadrosNoSegundo() {
+  Jogo.depuracao.obstaculos.length = 0;   // nada para bater durante a medicao
+  const antes = Jogo.depuracao.quadroCorrida;
+  for (let i = 0; i < 30; i++) Jogo.atualizar(PASSO);
+  return (Jogo.depuracao.quadroCorrida - antes) * 2;
+}
+Jogo.novaPartida();
+const taxaLargada = quadrosNoSegundo();
+jogarPartida(180, 4242, 'teclado');
+Math.random = originalRandom;
+const taxaFim = quadrosNoSegundo();
+// 8 quadros/s na largada, 12 na velocidade maxima (js/game.js).
+const cadenciaOk = Math.abs(taxaLargada - 8) < 0.3 && Math.abs(taxaFim - 12) < 0.3;
+console.log(`[passada] ${cadenciaOk ? 'ok' : 'FALHA'}  ${taxaLargada.toFixed(1)} quadros/s na largada, ` +
+  `${taxaFim.toFixed(1)} depois de 3 minutos (esperado 8 e 12)\n`);
+if (!cadenciaOk) falhas++;
+
 // O carnotauro e o unico obstaculo que NAO some com a tacapada: ele cai e o
 // corpo continua rolando com o cenario. O corpo tem que passar por cima do
 // jogador sem matar, nao pode levar outro golpe e precisa sair da lista ao

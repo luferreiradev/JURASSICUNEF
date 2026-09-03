@@ -29,10 +29,19 @@ const pastaAssets = path.join(raiz, 'assets');
 // contrario, para o preset novo nao rebalancear o jogo sem querer.
 const ALTURA_HEROI = 124;
 
-// Quadros do ataque em que o tacape realmente varre a frente do personagem
-// (o rastro branco aparece neles). Viram a janela em que o golpe machuca.
-const GOLPE_DE = 3;
-const GOLPE_ATE = 6;
+// Quadros em que o golpe machuca. O rastro branco do tacape aparece nos
+// quadros 3 a 5; a janela abre um quadro antes (o bastao ja esta vindo) e
+// fecha no fim do movimento, ainda com ele estendido a frente. Alargar dos
+// dois lados e o que da ao jogador tempo de REAGIR ao chefe em vez de ter que
+// adivinhar onde ele vai estar meio segundo depois.
+const GOLPE_DE = 2;
+const GOLPE_ATE = 7;
+
+// O preset animou o giro a 12 quadros/s num demo onde o mundo anda a 80 px/s.
+// No jogo o chao corre a 980 px/s: a 12 o golpe so caia 250ms depois do toque,
+// e a essa altura o carnotauro ja tinha passado. A 16 o giro fecha em meio
+// segundo e o tacape encosta em 125ms — da para bater vendo o bicho chegar.
+const FPS_ATAQUE = 16;
 
 // De que folha sai cada estado do jogo. O preset so tem corrida, deslize e
 // ataque; parado, pulo e morte reaproveitam quadros, como ele proprio faz ao
@@ -41,7 +50,7 @@ const MAPA = [
   ['parado', 'deslizar', [3], 1, 'ultimo quadro do deslize: o barbaro de pe, como no preset'],
   ['correr', 'correr', null, null, 'passada completa; o jogo ainda acelera a cadencia com a velocidade'],
   ['deslizar', 'deslizar', null, null, 'quadro 0 desce, 1 segura deitado, 2 levanta, 3 ja esta de pe'],
-  ['atacar', 'atacar', null, null, 'giro de 360 graus com o tacape'],
+  ['atacar', 'atacar', null, FPS_ATAQUE, 'giro de 360 graus com o tacape, mais rapido que no preset'],
   ['pular', 'correr', [3, 7], 6, 'os dois quadros da corrida em que ele esta no ar'],
   ['morrer', 'deslizar', [1], 1, 'o corpo esticado no chao'],
 ];

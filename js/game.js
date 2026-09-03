@@ -24,10 +24,11 @@ const Jogo = (function () {
 
   // Os 8 quadros de corrida formam UMA passada completa (as duas pernas).
   // Amarrar a cadencia direto na velocidade fazia as pernas baterem 6x por
-  // segundo no fim do jogo, virando borrao. Aqui ela vai de uma passada por
-  // segundo na largada a duas na velocidade maxima.
-  const CADENCIA_MIN = 9;      // quadros por segundo em VEL_INI
-  const CADENCIA_MAX = 17;     // quadros por segundo em VEL_MAX
+  // segundo no fim do jogo, virando borrao. O teto agora e a propria cadencia
+  // em que o preset animou a passada: acima dela o barbaro perde o peso que
+  // tem parado e vira boneco em camera rapida.
+  const CADENCIA_MIN = 8;                 // quadros por segundo em VEL_INI
+  const CADENCIA_MAX = HEROI.correr.fps;  // 12: a cadencia do preset, em VEL_MAX
 
   // O ataque dura exatamente o que a folha do preset dura (8 quadros a 12 fps)
   // e so machuca na janela em que o rastro do tacape aparece nela.

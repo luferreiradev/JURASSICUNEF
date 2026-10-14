@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
-<link rel="stylesheet" href="css/style.css?v=6">
+<link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body>
 
@@ -49,29 +49,83 @@
 <div id="menu" class="tela oculto">
   <h1 class="marca">JURASSIC<span>UNEF</span></h1>
   <p class="subtitulo">Uma corrida pela Era Primitiva</p>
-  <button id="btJogar" class="botao" type="button">JOGAR</button>
-  <ul class="ajuda">
-    <li><b>toque na tela</b>, <b>W</b> ou <b>↑</b> — pular</li>
-    <li><b>arraste para baixo</b> ou <b>seta ↓</b> — deslizar</li>
-    <li><b>espaço</b>, <b>X</b> ou <b>BATER</b> — usar o tacape</li>
-    <li>pegue os <b>ovos</b> e descubra curiosidades</li>
-  </ul>
+  <label class="campo-nome" for="nomeJogador">
+    <span>SEU NOME</span>
+    <input id="nomeJogador" type="text" maxlength="24" autocomplete="name"
+           placeholder="Digite seu nome" aria-describedby="avisoNome">
+  </label>
+  <p id="avisoNome" class="aviso-nome" role="alert"></p>
+  <div class="acoes-menu">
+    <button id="btJogar" class="botao" type="button">JOGAR</button>
+    <button id="btComoJogar" class="botao secundario" type="button">COMO JOGAR</button>
+  </div>
   <button id="btSobre" class="link" type="button">sobre o projeto</button>
+</div>
+
+<div id="comoJogar" class="tela oculto">
+  <h2 class="titulo-fim">COMO JOGAR</h2>
+  <p id="tipoControle" class="tipo-controle"></p>
+
+  <div class="controles controles-toque" aria-label="Controles para celular ou tablet">
+    <div class="controle-card">
+      <span class="gesto toque" aria-hidden="true">☝</span>
+      <strong>TOQUE</strong>
+      <p>Toque e segure na tela para pular mais alto.</p>
+    </div>
+    <div class="controle-card">
+      <span class="gesto arraste" aria-hidden="true">↓</span>
+      <strong>ARRASTE PARA BAIXO</strong>
+      <p>Deslize o dedo para passar sob as saliências.</p>
+    </div>
+    <div class="controle-card">
+      <span class="gesto ataque" aria-hidden="true">BATER</span>
+      <strong>ATAQUE</strong>
+      <p>Toque em BATER para usar o tacape.</p>
+    </div>
+  </div>
+
+  <div class="controles controles-teclado" aria-label="Controles para computador">
+    <div class="controle-card">
+      <span class="teclas" aria-hidden="true"><kbd>W</kbd><em>ou</em><kbd>↑</kbd></span>
+      <strong>PULAR</strong>
+      <p>Segure a tecla para pular mais alto.</p>
+    </div>
+    <div class="controle-card">
+      <span class="teclas" aria-hidden="true"><kbd>S</kbd><em>ou</em><kbd>↓</kbd></span>
+      <strong>DESLIZAR</strong>
+      <p>Abaixe-se para passar sob as saliências.</p>
+    </div>
+    <div class="controle-card">
+      <span class="teclas" aria-hidden="true"><kbd class="largo">ESPAÇO</kbd><em>ou</em><kbd>X</kbd></span>
+      <strong>ATAQUE</strong>
+      <p>Use o tacape para quebrar obstáculos.</p>
+    </div>
+  </div>
+
+  <p class="dica-ovos"><span class="ovo-ajuda" aria-hidden="true"></span> Pegue os ovos para ganhar pontos e descobrir curiosidades.</p>
+  <button id="btVoltarComoJogar" class="botao pequeno" type="button">VOLTAR</button>
 </div>
 
 <div id="fim" class="tela oculto">
   <h2 class="titulo-fim">FIM DE JOGO</h2>
+  <p class="jogador-fim">JOGADOR <strong id="fimNome">Jogador(a)</strong></p>
   <div class="placar-fim">
     <span id="fimPontos">0</span>
     <small>pontos</small>
   </div>
   <p class="resumo">recorde <b id="fimRecorde">0</b> &nbsp;·&nbsp; ovos <b id="fimOvos">0</b></p>
-  <div class="fato">
-    <strong id="fimTitulo"></strong>
-    <p id="fimTexto"></p>
+  <div class="acoes-fim">
+    <button id="btDeNovo" class="botao" type="button">JOGAR DE NOVO</button>
+    <button id="btCuriosidades" class="botao-curiosidades" type="button"
+            aria-label="Abrir curiosidades" title="Curiosidades">?</button>
   </div>
-  <button id="btDeNovo" class="botao" type="button">JOGAR DE NOVO</button>
   <button id="btSobre2" class="link" type="button">sobre o projeto</button>
+</div>
+
+<div id="curiosidades" class="tela oculto">
+  <h2 class="titulo-fim">CURIOSIDADES</h2>
+  <div id="listaCuriosidades" class="lista-curiosidades"></div>
+  <button id="btVoltarCuriosidades" class="botao pequeno" type="button">VOLTAR</button>
 </div>
 
 <div id="sobre" class="tela oculto">
@@ -94,14 +148,14 @@
 
 <p id="girar" class="oculto">↻ vire o celular para jogar em tela cheia</p>
 
-<script src="js/assets-dados.js?v=6"></script>
-<script src="js/assets-homem.js?v=6"></script>
-<script src="js/assets-chefe.js?v=6"></script>
-<script src="js/assets.js?v=6"></script>
-<script src="js/curiosidades.js?v=6"></script>
-<script src="js/audio.js?v=6"></script>
-<script src="js/cenario-vulcanico.js?v=6"></script>
-<script src="js/game.js?v=6"></script>
-<script src="js/main.js?v=6"></script>
+<script src="js/assets-dados.js?v=7"></script>
+<script src="js/assets-homem.js?v=7"></script>
+<script src="js/assets-chefe.js?v=7"></script>
+<script src="js/assets.js?v=7"></script>
+<script src="js/curiosidades.js?v=7"></script>
+<script src="js/audio.js?v=7"></script>
+<script src="js/cenario-vulcanico.js?v=7"></script>
+<script src="js/game.js?v=7"></script>
+<script src="js/main.js?v=7"></script>
 </body>
 </html>

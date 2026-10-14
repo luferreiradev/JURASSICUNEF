@@ -150,6 +150,13 @@ html, body {
   box-shadow: 0 calc(var(--ui) * 1px) 0 var(--verde-forte);
 }
 .botao.pequeno { font-size: calc(var(--ui) * 18px); padding: calc(var(--ui) * 10px) calc(var(--ui) * 28px); }
+.botao.secundario {
+  color: var(--creme);
+  background: rgba(43, 29, 16, .78);
+  border: calc(var(--ui) * 2px) solid var(--areia);
+  box-shadow: 0 calc(var(--ui) * 5px) 0 #1c120a,
+              0 calc(var(--ui) * 9px) calc(var(--ui) * 14px) rgba(0, 0, 0, .35);
+}
 
 .link {
   font: inherit;
@@ -175,18 +182,150 @@ html, body {
   color: var(--creme);
 }
 
-/* ---- Ajuda do menu ------------------------------------------------------ */
+/* ---- Menu e nome do jogador -------------------------------------------- */
 
-.ajuda {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  font-size: calc(var(--ui) * 15px);
-  line-height: 1.85;
-  color: var(--areia-clara);
-  opacity: .92;
+.campo-nome {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(var(--ui) * 5px);
+  width: min(calc(var(--ui) * 340px), 86vw);
 }
-.ajuda b { color: var(--creme); }
+.campo-nome span {
+  margin-left: calc(var(--ui) * 5px);
+  color: var(--areia-clara);
+  font-size: calc(var(--ui) * 12px);
+  font-weight: 700;
+  letter-spacing: calc(var(--ui) * 1.5px);
+}
+.campo-nome input {
+  width: 100%;
+  border: calc(var(--ui) * 2px) solid rgba(233, 180, 95, .65);
+  border-radius: calc(var(--ui) * 12px);
+  padding: calc(var(--ui) * 10px) calc(var(--ui) * 14px);
+  color: var(--marrom-forte);
+  background: rgba(255, 246, 228, .96);
+  font: 600 calc(var(--ui) * 17px)/1.2 'Fredoka', sans-serif;
+  outline: 0;
+  touch-action: manipulation;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.campo-nome input:focus { border-color: var(--verde); box-shadow: 0 0 0 calc(var(--ui) * 3px) rgba(140, 198, 63, .3); }
+.campo-nome input[aria-invalid="true"] { border-color: #ff795d; }
+.aviso-nome {
+  margin: 0;
+  min-height: calc(var(--ui) * 16px);
+  color: #ffb09f;
+  font-size: calc(var(--ui) * 13px);
+  line-height: 1;
+}
+.acoes-menu,
+.acoes-fim {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--ui) * 16px);
+}
+
+/* ---- Como jogar -------------------------------------------------------- */
+
+.tipo-controle {
+  margin: calc(var(--ui) * -5px) 0 0;
+  color: var(--areia-clara);
+  font-size: calc(var(--ui) * 15px);
+}
+.controles {
+  display: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(var(--ui) * 12px);
+  width: min(calc(var(--ui) * 720px), 94vw);
+}
+body.modo-toque .controles-toque,
+body.modo-teclado .controles-teclado { display: grid; }
+.controle-card {
+  min-width: 0;
+  padding: calc(var(--ui) * 15px) calc(var(--ui) * 12px);
+  border: calc(var(--ui) * 2px) solid rgba(233, 180, 95, .42);
+  border-radius: calc(var(--ui) * 16px);
+  background: rgba(43, 29, 16, .76);
+}
+.controle-card strong {
+  display: block;
+  margin-top: calc(var(--ui) * 8px);
+  color: var(--areia);
+  font-size: calc(var(--ui) * 15px);
+  letter-spacing: calc(var(--ui) * .5px);
+}
+.controle-card p {
+  margin: calc(var(--ui) * 5px) 0 0;
+  color: var(--areia-clara);
+  font-size: calc(var(--ui) * 13px);
+  line-height: 1.35;
+}
+.gesto {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--ui) * 58px);
+  height: calc(var(--ui) * 58px);
+  color: var(--creme);
+  font-size: calc(var(--ui) * 36px);
+  line-height: 1;
+}
+.gesto.arraste {
+  border: calc(var(--ui) * 2px) dashed var(--areia);
+  border-radius: 999px;
+  animation: indicar-arraste 1.4s ease-in-out infinite;
+}
+.gesto.ataque {
+  width: calc(var(--ui) * 66px);
+  height: calc(var(--ui) * 66px);
+  border: calc(var(--ui) * 3px) solid #ffc247;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 32%, #e35b1c, #8f2205 72%);
+  font-size: calc(var(--ui) * 12px);
+  font-weight: 700;
+}
+@keyframes indicar-arraste {
+  0%, 100% { transform: translateY(calc(var(--ui) * -4px)); }
+  50% { transform: translateY(calc(var(--ui) * 5px)); }
+}
+.teclas {
+  display: flex;
+  min-height: calc(var(--ui) * 58px);
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--ui) * 7px);
+}
+.teclas kbd {
+  min-width: calc(var(--ui) * 44px);
+  padding: calc(var(--ui) * 9px) calc(var(--ui) * 10px);
+  border: calc(var(--ui) * 2px) solid var(--areia);
+  border-radius: calc(var(--ui) * 8px);
+  color: var(--marrom-forte);
+  background: var(--creme);
+  box-shadow: 0 calc(var(--ui) * 4px) 0 #b27c3d;
+  font: 700 calc(var(--ui) * 17px)/1 'Fredoka', sans-serif;
+}
+.teclas kbd.largo { min-width: calc(var(--ui) * 88px); font-size: calc(var(--ui) * 12px); }
+.teclas em { color: var(--areia-clara); font-size: calc(var(--ui) * 11px); font-style: normal; }
+.dica-ovos {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--ui) * 9px);
+  margin: 0;
+  color: var(--areia-clara);
+  font-size: calc(var(--ui) * 14px);
+}
+.ovo-ajuda {
+  flex: 0 0 auto;
+  width: calc(var(--ui) * 16px);
+  height: calc(var(--ui) * 21px);
+  background: var(--creme);
+  border: calc(var(--ui) * 2px) solid var(--marrom-forte);
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+}
 
 /* ---- Carregando --------------------------------------------------------- */
 
@@ -334,20 +473,76 @@ html, body {
 }
 .resumo b { color: var(--creme); }
 
-.fato {
-  max-width: calc(var(--ui) * 520px);
-  padding: calc(var(--ui) * 12px) calc(var(--ui) * 18px);
-  border-radius: calc(var(--ui) * 14px);
-  background: rgba(0, 0, 0, .3);
+.jogador-fim {
+  margin: 0;
+  color: var(--areia-clara);
+  font-size: calc(var(--ui) * 13px);
+  letter-spacing: calc(var(--ui) * 1px);
+}
+.jogador-fim strong {
+  display: block;
+  margin-top: calc(var(--ui) * 4px);
+  color: var(--creme);
+  font-size: calc(var(--ui) * 23px);
+  letter-spacing: 0;
+}
+.botao-curiosidades {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--ui) * 58px);
+  height: calc(var(--ui) * 58px);
+  padding: 0;
+  border: calc(var(--ui) * 3px) solid var(--areia);
+  border-radius: 50%;
+  color: var(--marrom-forte);
+  background: var(--creme);
+  box-shadow: 0 calc(var(--ui) * 5px) 0 #a56c2d,
+              0 calc(var(--ui) * 9px) calc(var(--ui) * 14px) rgba(0, 0, 0, .35);
+  font: 700 calc(var(--ui) * 34px)/1 'Fredoka', sans-serif;
+  cursor: pointer;
+}
+.botao-curiosidades:active { transform: translateY(calc(var(--ui) * 4px)); box-shadow: 0 calc(var(--ui) * 1px) 0 #a56c2d; }
+
+/* ---- Galeria de curiosidades ------------------------------------------ */
+
+#curiosidades { padding-bottom: max(calc(var(--ui) * 20px), env(safe-area-inset-bottom)); }
+.lista-curiosidades {
+  width: min(calc(var(--ui) * 720px), 94vw);
+  max-height: min(68vh, calc(var(--ui) * 430px));
+  padding: calc(var(--ui) * 5px) calc(var(--ui) * 8px) calc(var(--ui) * 5px) calc(var(--ui) * 3px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  scrollbar-color: var(--areia) rgba(43, 29, 16, .55);
+}
+.lista-curiosidades article {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: calc(var(--ui) * 13px);
+  margin-bottom: calc(var(--ui) * 10px);
+  padding: calc(var(--ui) * 13px) calc(var(--ui) * 16px);
   border-left: calc(var(--ui) * 5px) solid var(--areia);
+  border-radius: calc(var(--ui) * 12px);
+  background: rgba(43, 29, 16, .82);
   text-align: left;
 }
-.fato strong { display: block; font-size: calc(var(--ui) * 16px); color: var(--areia); }
-.fato p {
+.numero-curiosidade {
+  color: var(--verde);
+  font-size: calc(var(--ui) * 18px);
+  font-weight: 700;
+}
+.lista-curiosidades strong {
+  display: block;
+  color: var(--areia);
+  font-size: calc(var(--ui) * 15px);
+  text-transform: uppercase;
+}
+.lista-curiosidades p {
   margin: calc(var(--ui) * 4px) 0 0;
-  font-size: calc(var(--ui) * 14px);
-  font-weight: 500;
-  line-height: 1.45;
+  color: var(--creme);
+  font-size: calc(var(--ui) * 13px);
+  line-height: 1.4;
 }
 
 /* ---- Sobre --------------------------------------------------------------- */
@@ -381,4 +576,26 @@ html, body {
 /* Quem preferir menos movimento nao leva animacao nenhuma. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
+
+@media (max-width: 700px), (max-height: 520px) {
+  .tela { gap: calc(var(--ui) * 9px); padding: calc(var(--ui) * 14px); }
+  .marca { font-size: calc(var(--ui) * 52px); }
+  .marca span { font-size: calc(var(--ui) * 34px); }
+  .acoes-menu { gap: calc(var(--ui) * 10px); }
+  .acoes-menu .botao { font-size: calc(var(--ui) * 17px); padding: calc(var(--ui) * 10px) calc(var(--ui) * 20px); }
+  .controles { gap: calc(var(--ui) * 8px); }
+  .controle-card { padding: calc(var(--ui) * 10px) calc(var(--ui) * 8px); }
+  .controle-card p { font-size: calc(var(--ui) * 11px); }
+  .gesto, .teclas { transform: scale(.88); }
+}
+
+@media (max-width: 520px) and (orientation: portrait) {
+  .acoes-menu { flex-direction: column; }
+  .controles { grid-template-columns: 1fr; max-height: 56vh; overflow-y: auto; touch-action: pan-y; }
+  .controle-card { display: grid; grid-template-columns: calc(var(--ui) * 76px) 1fr; align-items: center; text-align: left; }
+  body.modo-teclado .controle-card { grid-template-columns: calc(var(--ui) * 150px) 1fr; }
+  .controle-card .gesto, .controle-card .teclas { grid-row: span 2; }
+  .controle-card strong { margin-top: 0; }
+  .dica-ovos { max-width: 90vw; }
 }

@@ -4,6 +4,7 @@
 
 (function () {
   const CHAVE_RECORDE = 'jurassic_unef_recorde';
+  const CHAVE_NOME = 'jurassic_unef_nome';
   const PASSO = 1 / 60;              // passo fixo da simulacao
   const ESPERA_FIM = 0.9;            // deixa a animacao de morte rodar antes da tela
   const TEMPO_TOAST = 5200;
@@ -17,12 +18,15 @@
   const telas = {
     carregando: $('carregando'),
     menu: $('menu'),
+    comoJogar: $('comoJogar'),
     fim: $('fim'),
+    curiosidades: $('curiosidades'),
     sobre: $('sobre'),
   };
 
-  let estado = 'carregando';         // carregando | menu | jogo | fim | sobre
+  let estado = 'carregando';         // carregando | menu | jogo | fim | curiosidades | sobre
   let recorde = parseInt(localStorage.getItem(CHAVE_RECORDE) || '0', 10) || 0;
+  let nomeJogador = '';
   let liberaFimEm = 0;               // instante a partir do qual pode reiniciar
   let timerToast = null;
 
@@ -38,6 +42,22 @@
 
   const UI_MIN = 0.85;
   const UI_MAX = 1.7;
+  const midiaToque = window.matchMedia('(pointer: coarse)');
+
+  function usaControleToque() {
+    const agenteMovel = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    return midiaToque.matches || agenteMovel ||
+      ((navigator.maxTouchPoints || 0) > 0 && window.innerWidth <= 900);
+  }
+
+  function atualizarTipoControle() {
+    const toque = usaControleToque();
+    document.body.classList.toggle('modo-toque', toque);
+    document.body.classList.toggle('modo-teclado', !toque);
+    $('tipoControle').textContent = toque
+      ? 'Controles para celular ou tablet'
+      : 'Controles para computador';
+  }
 
   function redimensionar() {
     const escala = Math.min(window.innerWidth / Jogo.MUNDO_L, window.innerHeight / Jogo.MUNDO_A);
@@ -59,6 +79,7 @@
 
     const retrato = window.innerHeight > window.innerWidth;
     $('girar').classList.toggle('oculto', !retrato);
+    atualizarTipoControle();
   }
 
   /* ---- Navegacao entre telas ---------------------------------------------- */
@@ -71,6 +92,21 @@
   }
 
   function comecarPartida() {
+    if (estado === 'menu') {
+      const campo = $('nomeJogador');
+      const nome = campo.value.trim().replace(/\s+/g, ' ');
+      if (!nome) {
+        $('avisoNome').textContent = 'Digite seu nome para começar.';
+        campo.setAttribute('aria-invalid', 'true');
+        campo.focus();
+        return;
+      }
+      nomeJogador = nome.slice(0, 24);
+      campo.value = nomeJogador;
+      campo.removeAttribute('aria-invalid');
+      $('avisoNome').textContent = '';
+      try { localStorage.setItem(CHAVE_NOME, nomeJogador); } catch (e) { /* modo anonimo */ }
+    }
     Som.destravar();
     esconderToast();
     Jogo.novaPartida();
@@ -106,6 +142,26 @@
     $('toast').classList.add('oculto');
   }
 
+  function montarListaCuriosidades() {
+    const lista = $('listaCuriosidades');
+    lista.textContent = '';
+    Curiosidades.todos().forEach((fato, indice) => {
+      const artigo = document.createElement('article');
+      const numero = document.createElement('span');
+      const conteudo = document.createElement('div');
+      const titulo = document.createElement('strong');
+      const texto = document.createElement('p');
+
+      numero.className = 'numero-curiosidade';
+      numero.textContent = String(indice + 1).padStart(2, '0');
+      titulo.textContent = fato.titulo;
+      texto.textContent = fato.texto;
+      conteudo.append(titulo, texto);
+      artigo.append(numero, conteudo);
+      lista.append(artigo);
+    });
+  }
+
   /* ---- Eventos do jogo ------------------------------------------------------ */
 
   Jogo.on('aoColetar', (fato) => {
@@ -133,12 +189,10 @@
       recorde = pontos;
       try { localStorage.setItem(CHAVE_RECORDE, String(recorde)); } catch (e) { /* modo anonimo */ }
     }
-    const fato = Curiosidades.sortear();
+    $('fimNome').textContent = nomeJogador || 'Jogador(a)';
     $('fimPontos').textContent = pontos;
     $('fimRecorde').textContent = recorde;
     $('fimOvos').textContent = ovos;
-    $('fimTitulo').textContent = fato.titulo;
-    $('fimTexto').textContent = fato.texto;
     document.querySelector('#fim .titulo-fim').textContent = novoRecorde ? 'NOVO RECORDE!' : 'FIM DE JOGO';
   });
 
@@ -152,6 +206,7 @@
   }
 
   document.addEventListener('keydown', (e) => {
+    if (e.target.matches('input, textarea, select')) return;
     if (e.repeat) return;
     if (e.code === 'Space' || e.code === 'KeyX') {
       e.preventDefault();
@@ -163,8 +218,9 @@
     } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
       e.preventDefault();
       Jogo.deslizar(true);
-    } else if (e.code === 'Escape' && estado === 'sobre') {
-      irParaMenu();
+    } else if (e.code === 'Escape') {
+      if (estado === 'sobre' || estado === 'comoJogar') irParaMenu();
+      else if (estado === 'curiosidades') irPara('fim');
     }
   });
 
@@ -184,7 +240,8 @@
   let toque = null;
 
   document.body.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('button')) return;   // deixa os botoes funcionarem
+    if (e.target.closest('button, input, label, a')) return; // deixa os controles funcionarem
+    if (estado !== 'jogo') return;
     e.preventDefault();
     toque = { id: e.pointerId, y: e.clientY, deslizou: false };
     acaoPrincipal();
@@ -209,8 +266,27 @@
   document.body.addEventListener('contextmenu', (e) => e.preventDefault());
 
   $('btJogar').addEventListener('click', comecarPartida);
+  $('nomeJogador').addEventListener('input', (e) => {
+    if (e.currentTarget.value.trim()) {
+      e.currentTarget.removeAttribute('aria-invalid');
+      $('avisoNome').textContent = '';
+    }
+  });
+  $('nomeJogador').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      comecarPartida();
+    }
+  });
   $('btDeNovo').addEventListener('click', () => { if (podeReiniciar()) comecarPartida(); });
   $('btAtacar').addEventListener('click', (e) => { e.stopPropagation(); Jogo.atacar(); });
+  $('btComoJogar').addEventListener('click', () => {
+    atualizarTipoControle();
+    irPara('comoJogar');
+  });
+  $('btVoltarComoJogar').addEventListener('click', irParaMenu);
+  $('btCuriosidades').addEventListener('click', () => irPara('curiosidades'));
+  $('btVoltarCuriosidades').addEventListener('click', () => irPara('fim'));
   $('btSobre').addEventListener('click', () => irPara('sobre'));
   $('btSobre2').addEventListener('click', () => irPara('sobre'));
   $('btVoltar').addEventListener('click', irParaMenu);
@@ -267,6 +343,10 @@
   redimensionar();
   Jogo.iniciar(ctx);
   Jogo.modoDemo();
+  try { nomeJogador = localStorage.getItem(CHAVE_NOME) || ''; } catch (e) { nomeJogador = ''; }
+  $('nomeJogador').value = nomeJogador;
+  montarListaCuriosidades();
+  atualizarTipoControle();
   $('btSom').textContent = Som.estaMudo() ? '🔇' : '🔊';
   $('recorde').textContent = recorde;
 
